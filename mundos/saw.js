@@ -69,7 +69,7 @@ function fightUse(){
   say((F.partial||{})[s]||'¡Eso no le hace nada!',2600);
 }
 function fightWin(F){
-  endFight();G.f['fw_'+F.id]=1;if(!F.keep)drop(F.win);
+  endFight();cap.style.display='none';G.f['fw_'+F.id]=1;if(!F.keep)drop(F.win);
   if(F.onWin)F.onWin(G.f);
   if(started){SFX.thud();SFX.laugh()}fx('flash');
   G.cp=snap();saveGame();gRender();say(F.winSay,4000);
@@ -211,7 +211,7 @@ HS.hub=Object.assign(Object.fromEntries(TVS.map(t=>['tv'+t.n,{at:[t.x,310],uses:
     if(!miss.length){if(!f.hub_llave){f.hub_llave=1;gRender();if(started){SFX.door();SFX.sting()}give('llaveCorazon');return say('¡Los 4 trozos se juntaron! ¡LA LLAVE DEL CORAZÓN! Con esto suelto las cadenas de Juan Pablo.',4000)}
       return say('El altar ya está completo.')}
     say(`Un altar con un corazón partido en 4 trozos: Sótano, Hospital, Desguace y Circo. Me faltan ${miss.length}.`,3000);
-    setTimeout(()=>{if(!G.over&&G.room==='hub')tvSay('EL MARRANO',PIECE_RIDDLE[miss[0]],1)},3200)}}});
+    setTimeout(()=>{const m=[1,2,3,4].filter(q=>!G.f['alt'+q]);if(!G.over&&G.room==='hub'&&m.length)tvSay('EL MARRANO',PIECE_RIDDLE[m[0]],1)},3200)}}});
 const PIECE_RIDDLE={
   1:'Mi trozo del sótano está donde más frío hace... dentro de un hielo que ni una estufa derrite. Solo una LLAMARADA puede con él.',
   2:'En mi hospital, mi trozo flota en un frasco del director. No metas la mano... sácalo con algo que atraiga el metal, colgado de una cuerda.',

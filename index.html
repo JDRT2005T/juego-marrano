@@ -1077,7 +1077,7 @@ function changeRoom(to){
     if(amb){setTimeout(()=>{if(!G.over&&G.room===to)startFight(amb)},650);return}
     const sc=$('#scene');sc.classList.remove('enter');void sc.offsetWidth;sc.classList.add('enter');
     if(first&&ROOM_INTRO[to])setTimeout(()=>say(ROOM_INTRO[to]),400);
-    if(first&&ROOM_TAUNT[to])setTimeout(()=>{if(!G.over)tvSay(...ROOM_TAUNT[to])},4200);
+    if(first&&ROOM_TAUNT[to])setTimeout(()=>{if(!G.over&&!G.fight&&G.room===to)tvSay(...ROOM_TAUNT[to])},4200);
   },250);
 }
 const ROOM_TAUNT={
