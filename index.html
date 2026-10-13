@@ -1,0 +1,1759 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>El Juego del Marrano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,700;1,700&family=Creepster&display=swap" rel="stylesheet">
+<style>
+:root{--red:#c1121f}
+html,body{margin:0;height:100%;background:#000;color:#eee;font-family:'Comic Neue',cursive;overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
+#stage{position:relative;width:min(100vw,177.78vh);aspect-ratio:16/9;background:#000;overflow:hidden;cursor:pointer}
+#scene,#scene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+/* globo de cómic */
+#bub{position:absolute;display:none;background:#fff;color:#111;border:3px solid #000;border-radius:22px;padding:.4em .9em .5em;font-weight:700;font-size:clamp(12px,2.3vw,24px);line-height:1.18;max-width:44%;min-width:12%;transform:translateX(-50%);box-shadow:4px 5px 0 rgba(0,0,0,.35);z-index:3}
+#bub:before{content:'';position:absolute;left:50%;bottom:-21px;transform:translateX(-50%);border-left:12px solid transparent;border-right:12px solid transparent;border-top:20px solid #000}
+#bub:after{content:'';position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid #fff}
+#bub .w{display:block;font-size:.6em;letter-spacing:1px;color:#2f6db0}
+#bub[data-w="EL MARRANO"] .w{color:var(--red)}
+#bub[data-w="JUAN PABLO"] .w{color:#2f8a3e}
+/* recuadro de narración */
+#cap{position:absolute;left:2.5%;top:3.5%;max-width:62%;background:#ffe25e;color:#111;border:3px solid #000;padding:.3em .8em .4em;font-weight:700;font-style:italic;font-size:clamp(12px,2.2vw,22px);box-shadow:4px 5px 0 rgba(0,0,0,.35);display:none;z-index:3}
+#cap.low{top:auto;bottom:18.5%}
+#cap.center{left:50%;top:50%;transform:translate(-50%,-50%);background:none;border:0;box-shadow:none;color:#fff;font-size:clamp(16px,3.4vw,36px);text-align:center;max-width:80%}
+
+#dark{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+#dark.flick{animation:flick 1.4s linear}
+@keyframes flick{0%{opacity:0}8%{opacity:.95}14%{opacity:.1}22%{opacity:.9}30%{opacity:0}48%{opacity:.85}55%{opacity:.2}62%{opacity:.95}100%{opacity:0}}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#flash.on{animation:flash .9s ease-out}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+#stage.shake{animation:shake .5s linear 2}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-8px,4px)}40%{transform:translate(7px,-5px)}60%{transform:translate(-6px,-3px)}80%{transform:translate(5px,5px)}}
+.spin{animation:spin 9s linear infinite;transform-box:fill-box;transform-origin:center}
+.spinr{animation:spin 6s linear infinite reverse;transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flk{animation:flk 3s infinite}
+@keyframes flk{0%,100%{opacity:1}42%{opacity:1}44%{opacity:.25}46%{opacity:1}48%{opacity:.4}50%{opacity:1}}
+#jaw{transform-box:fill-box}
+#stage.talk #jaw{animation:jaw .16s infinite alternate}
+@keyframes jaw{to{transform:translateY(9px)}}
+.broom{animation:broom 2.4s ease-in-out infinite alternate}
+@keyframes broom{from{transform:translateX(40px)}to{transform:translateX(0)}}
+.sweat{animation:sweat 1.2s ease-in infinite}
+@keyframes sweat{from{transform:translateY(0);opacity:1}to{transform:translateY(18px);opacity:0}}
+.bob{animation:bob 1s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-6px)}}
+.blink{animation:bl 1s steps(2) infinite}
+/* animaciones de los personajes (parpadeo, boca, respirar, teclear, caminar, temblar) */
+.eyes{animation:eyes 4.2s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes eyes{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+.mo{opacity:0}
+.mouth{transform-box:fill-box;transform-origin:center}
+#stage.tk-juan .juan .mo,#stage.tk-jp .jp .mo{animation:mo .24s steps(1) infinite}
+@keyframes mo{0%{opacity:1}50%{opacity:0}}
+#stage.tk-juan .juan .mouth,#stage.tk-jp .jp .mouth{animation:mth .13s infinite alternate}
+@keyframes mth{to{transform:scaleY(.4)}}
+.breathe{animation:breathe 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes breathe{50%{transform:scaleY(1.02)}}
+.tap1{animation:tap .17s infinite alternate}.tap2{animation:tap .17s infinite alternate-reverse}
+@keyframes tap{to{transform:translateY(-5px)}}
+.tremble{animation:trem .11s infinite alternate}
+@keyframes trem{to{transform:translate(1.5px,-1px)}}
+.legL,.legR,.armL,.armR{transform-box:fill-box;transform-origin:50% 0}
+#stage.walking .legL,#stage.walking .armR{animation:swing .3s infinite alternate}
+#stage.walking .legR,#stage.walking .armL{animation:swing .3s infinite alternate-reverse}
+@keyframes swing{from{transform:rotate(-15deg)}to{transform:rotate(15deg)}}
+#stage.walking .breathe{animation:wbob .15s infinite alternate}
+.beltItem{animation:belt 6.4s linear infinite}
+@keyframes belt{from{transform:translateX(150px)}to{transform:translateX(650px)}}
+.duckRow{animation:duck 4s linear infinite}
+.paused .broom,.paused .tremble{animation-play-state:paused}
+@keyframes duck{from{transform:translateX(-40px)}to{transform:translateX(640px)}}
+@keyframes wbob{to{transform:translateY(-4px)}}
+@keyframes bl{50%{opacity:0}}
+
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:5}
+#title{background:radial-gradient(ellipse at center,#2a0306 0%,#000 70%)}
+#title .pre{font-size:clamp(12px,2vw,20px);letter-spacing:4px;color:#aaa}
+#title h1{font-family:'Creepster',cursive;font-weight:400;font-size:clamp(34px,8vw,92px);margin:.1em 0 0;color:var(--red);text-shadow:0 0 30px rgba(193,18,31,.6);letter-spacing:3px}
+#title h2{font-family:'Creepster',cursive;font-weight:400;font-size:clamp(20px,4vw,46px);margin:0 0 .6em;color:#e9e1d0}
+button.big{font-family:'Comic Neue',cursive;font-weight:700;font-size:clamp(16px,2.6vw,28px);background:var(--red);color:#fff;border:3px solid #000;border-radius:10px;padding:.4em 1.5em;cursor:pointer;box-shadow:4px 5px 0 rgba(0,0,0,.5)}
+button.big:active{transform:translate(2px,2px)}
+#title p{font-size:clamp(11px,1.6vw,16px);color:#999;margin-top:1.2em}
+#final{display:none;background:rgba(0,0,0,.62)}
+#final .t1{font-size:clamp(14px,2.8vw,30px);font-weight:700;color:#fff;-webkit-text-stroke:1px #000}
+#clock{font-family:'Creepster',cursive;font-size:clamp(70px,17vw,190px);color:var(--red);line-height:1;text-shadow:0 0 30px rgba(193,18,31,.7),4px 4px 0 #000}
+#final .t2{font-size:clamp(13px,2.2vw,24px);color:#ddd;margin:.3em 0 1em}
+#mute{position:absolute;top:8px;right:8px;z-index:6;font-family:inherit;background:rgba(0,0,0,.55);color:#ddd;border:2px solid #000;border-radius:8px;padding:3px 9px;font-size:clamp(12px,1.6vw,16px);cursor:pointer}
+#skip{position:absolute;right:1.6%;bottom:2.4%;z-index:6;font-family:inherit;font-weight:700;background:#3dbb3d;color:#fff;border:3px solid #000;border-radius:8px;padding:2px 10px;font-size:clamp(11px,1.6vw,17px);cursor:pointer;-webkit-text-stroke:.5px #000;box-shadow:2px 3px 0 rgba(0,0,0,.5)}
+button.link{margin-top:.8em;background:none;border:0;color:#ccc;text-decoration:underline;font-family:inherit;font-weight:700;font-size:clamp(12px,1.8vw,18px);cursor:pointer}
+#hud{position:absolute;top:2%;left:50%;transform:translateX(-50%);display:none;z-index:4;text-align:center;pointer-events:none}
+#gclock{font-family:'Creepster',cursive;font-size:clamp(26px,5vw,54px);color:#ff2a2a;text-shadow:3px 3px 0 #000;line-height:1}
+#gclock.low{animation:bl .5s steps(2) infinite}
+#pbarw{width:clamp(120px,24vw,260px);height:clamp(9px,1.5vw,15px);background:#222;border:2px solid #000;border-radius:8px;overflow:hidden;margin:3px auto 0}
+#pbar{height:100%;width:0;background:linear-gradient(90deg,#d9b07a,#c1121f);transition:width .9s linear}
+#hud small{display:block;font-weight:700;font-size:clamp(9px,1.3vw,14px);color:#fff;text-shadow:1px 1px 0 #000,-1px -1px 0 #000}
+#panel{position:absolute;inset:0;z-index:7;display:none;background:rgba(0,0,0,.78);align-items:center;justify-content:center}
+#panel .inner{width:84%;position:relative;text-align:center}
+#panel svg{width:100%;height:auto;display:block}
+#pclose{margin-top:1.5%;font-size:clamp(13px,2vw,22px);padding:.25em 1.2em}
+.kp{display:inline-block;background:#333;border:4px solid #000;border-radius:16px;padding:2% 3%;box-shadow:5px 6px 0 rgba(0,0,0,.5)}
+.kpt{color:#ddd;font-weight:700;font-size:clamp(13px,2vw,22px)}
+#kpd{background:#1a2a1a;color:#4dd84d;font-family:monospace;font-size:clamp(24px,5vw,52px);padding:.1em .5em;margin:.25em 0;border:3px solid #000;border-radius:8px;letter-spacing:4px}
+.kpg{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(4px,1vw,10px)}
+.kpg button{font-family:inherit;font-weight:700;font-size:clamp(16px,3vw,30px);padding:.15em .6em;background:#c9ccd1;border:3px solid #000;border-radius:8px;cursor:pointer}
+.kpg button:active{background:#ffe25e}
+#kpm{min-height:1.4em;font-weight:700;font-size:clamp(13px,2vw,20px);margin-top:.3em}
+.kpg1{display:flex;justify-content:center;margin-top:.4em}
+.kpg1 button,.chg button,.sqg button{font-family:inherit;font-weight:700;font-size:clamp(14px,2.4vw,26px);padding:.2em .8em;background:#c9ccd1;border:3px solid #000;border-radius:8px;cursor:pointer}
+.ltw{display:flex;gap:clamp(4px,1vw,12px);justify-content:center;margin:.3em 0}
+.lt{display:flex;flex-direction:column;align-items:center;gap:4px}
+.lt button{font-size:clamp(12px,2vw,20px);background:#c9ccd1;border:3px solid #000;border-radius:6px;cursor:pointer;width:2.4em}
+.ltc{background:#1a2a1a;color:#4dd84d;font-family:monospace;font-size:clamp(24px,4.5vw,48px);width:1.4em;text-align:center;border:3px solid #000;border-radius:8px}
+.sqd{display:flex;gap:6px;justify-content:center;margin:.4em 0;min-height:16px}.sqd span{width:16px;height:16px;border-radius:50%;background:#555;border:2px solid #000}.sqd span.on{background:#4dd84d}
+.sqg{display:flex;gap:clamp(6px,1.4vw,14px);justify-content:center}.sqg button{width:clamp(48px,9vw,90px);height:clamp(48px,9vw,90px);border-radius:50%;color:#fff;text-shadow:1px 1px 0 #000}
+.lvw{display:flex;gap:clamp(6px,1.4vw,14px);justify-content:center;margin:.4em 0}
+.lv{width:clamp(40px,7vw,64px);height:clamp(90px,16vw,140px);background:#555;border:3px solid #000;border-radius:10px;position:relative;cursor:pointer}
+.lv span{position:absolute;left:20%;right:20%;height:38%;bottom:6%;background:#c1121f;border:3px solid #000;border-radius:8px;transition:bottom .15s}
+.lv.up span{bottom:56%;background:#4dd84d}.lv b{position:absolute;top:-1.4em;left:0;right:0;color:#fff;font-size:clamp(11px,1.6vw,16px)}
+.chg{display:grid;gap:clamp(6px,1.2vw,12px);margin:.5em 0}
+.clk{width:clamp(140px,26vw,260px);margin:.3em auto}
+.crg{width:clamp(180px,32vw,320px);margin:.3em auto}
+#wcard{background:radial-gradient(ellipse at center,#5a1a8a 0%,#14001f 75%);z-index:8;cursor:pointer}
+#wcard .wc-n{font-family:'Creepster',cursive;font-size:clamp(30px,7vw,80px);color:#ffe25e;text-shadow:4px 4px 0 #000}
+#wcard .wc-t{font-family:'Creepster',cursive;font-size:clamp(26px,6vw,64px);color:#fff;text-shadow:4px 4px 0 #000}
+#wcard .wc-s{font-weight:700;font-size:clamp(13px,2.2vw,22px);color:#e8d8ff;max-width:80%;margin-top:.6em}
+#wcard .wc-h{margin-top:1.4em;color:#aaa;font-size:clamp(11px,1.6vw,15px);animation:bl 1s steps(2) infinite}
+#end{display:none;background:rgba(0,0,0,.8)}
+#end .t1{font-family:'Creepster',cursive;font-size:clamp(28px,6vw,70px);color:#ff2a2a;text-shadow:3px 3px 0 #000}
+#end.win .t1{color:#4dd84d}
+#end .t2{font-size:clamp(13px,2.3vw,24px);color:#eee;max-width:80%;margin:.4em auto 1em}
+#end button{margin:.3em}
+#ftimer{position:absolute;top:3%;left:50%;transform:translateX(-50%);z-index:6;display:none;font-family:'Creepster',cursive;font-size:clamp(40px,9vw,100px);color:#ff2a2a;text-shadow:4px 4px 0 #000,0 0 24px rgba(255,0,0,.7);pointer-events:none;line-height:1}
+#ftimer:before{content:'⏱ ';font-size:.6em}
+#ftimer.low{animation:bl .4s steps(2) infinite}
+#fvig{position:absolute;inset:0;z-index:3;display:none;pointer-events:none;box-shadow:inset 0 0 120px 40px rgba(255,0,0,.55);animation:vig 1s ease-in-out infinite alternate}
+@keyframes vig{from{opacity:.5}to{opacity:1}}
+.fatk{animation:trem .09s infinite alternate}
+#kill{display:none;z-index:9;background:#000}
+#kill svg{position:absolute;inset:0;width:100%;height:100%}
+.lunge{animation:lunge .7s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes lunge{from{transform:translateX(320px) scale(.6)}to{transform:none}}
+.boom{animation:boom .5s .45s cubic-bezier(.2,1.8,.4,1) both;transform-box:fill-box;transform-origin:center}
+@keyframes boom{from{transform:scale(0)}to{transform:scale(1)}}
+#endH{display:none;background:#ffe25e;color:#111;border:3px solid #000;border-radius:10px;padding:.4em .9em;font-weight:700;font-size:clamp(13px,2.2vw,22px);max-width:78%;margin:0 auto 1em;box-shadow:4px 5px 0 rgba(0,0,0,.5)}
+/* más animación: Juan salta al recoger, niega con la cabeza, se inclina al caminar; polvo; brillo al pasar el ratón */
+#stage.pick .juan .breathe{animation:hop .45s ease-out}
+@keyframes hop{30%{transform:translateY(-16px) scaleY(1.04)}60%{transform:translateY(0) scaleY(.94)}}
+#stage.nope .juan .breathe{animation:nope .5s ease-in-out}
+@keyframes nope{20%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}80%{transform:rotate(-4deg)}}
+#pjl{transition:transform .2s}
+.fidle{animation:fidle 1.4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes fidle{to{transform:scale(1.03,1.05)}}
+.mote{animation:mote 9s linear infinite;opacity:0}
+@keyframes mote{0%{transform:translate(0,0);opacity:0}15%{opacity:.55}85%{opacity:.4}100%{transform:translate(30px,-90px);opacity:0}}
+#scene.enter{animation:enter .4s ease-out}
+@keyframes enter{from{opacity:.25;transform:scale(1.05)}to{opacity:1;transform:none}}
+.sparkle{animation:sparkle .6s ease-out forwards;transform-box:fill-box;transform-origin:center}
+@keyframes sparkle{from{transform:scale(.2);opacity:1}to{transform:scale(1.8);opacity:0}}
+@media (hover:hover){[data-hs]:hover{filter:brightness(1.2) drop-shadow(0 0 5px rgba(255,255,255,.7))}}
+#rot{display:none}
+@media (orientation:portrait) and (max-width:700px){#rot{display:block;position:fixed;left:0;right:0;bottom:12%;text-align:center;color:#888;font-size:14px}}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <div id="scene"></div>
+    <div id="dark"></div>
+    <div id="flash"></div>
+    <div id="bub"><span class="w"></span><span id="btx"></span></div>
+    <div id="cap"><span id="ctx"></span></div>
+    <button id="mute" title="Sonido">🔊</button>
+    <button id="skip" title="Saltar">SALTAR ⏭</button>
+    <div id="title" class="overlay">
+      <div class="pre">UN JUEGO PARA</div>
+      <h1>JUAN ATENCIA</h1>
+      <h2>El Juego del Marrano</h2>
+      <button class="big" id="play">▶ JUGAR</button>
+      <button class="big" id="contTitle" style="display:none;margin-top:.5em;background:#2f8a3e">⏩ Continuar partida</button>
+      <p>Toca la pantalla para avanzar · Sube el volumen 🔊</p>
+    </div>
+    <div id="final" class="overlay">
+      <div class="t1">¡SALVA A JUAN PABLO!</div>
+      <div id="clock">🐷</div>
+      <div class="t2">NIVEL 1 · El sótano del Marrano</div>
+      <button class="big" id="playgame">▶ ¡A JUGAR!</button>
+      <button class="big" id="contgame" style="display:none;margin-top:.5em;background:#2f8a3e">⏩ Continuar partida</button>
+      <button class="link" id="again">↺ Ver la intro otra vez</button>
+    </div>
+    <div id="hud"><div id="gclock">05:00</div><div id="pbarw"><div id="pbar"></div></div><small>🧹 el palo se acerca a Juan Pablo</small></div>
+    <div id="panel"><div class="inner"><div id="pcontent"></div><button class="big" id="pclose">✕ Salir</button></div></div>
+    <div id="end" class="overlay"><div class="t1" id="endT"></div><div class="t2" id="endS"></div><div id="endH"></div><div id="endB"></div></div>
+  </div>
+</div>
+<div id="rot">📱 Gira el móvil para verlo más grande</div>
+
+<script>
+/* ================= DIBUJOS (estilo cómic: colores planos + contorno negro) ================= */
+const SKIN='#e2a96e', SKIN_D='#b9824d';
+const K='stroke="#000" stroke-width="3" stroke-linejoin="round"';
+const K2='stroke="#000" stroke-width="2" stroke-linejoin="round"';
+/* Juan: pelo corto rapado a los lados, gafas, camiseta clara de baloncesto, short oscuro */
+const JUAN={fade:true,glasses:true,round:true,hair:'#141010',skin:'#f6d6bd'}, JUAN_SHIRT='#ece4cc';
+/* Juan Pablo: pelo ondulado con volumen, piel clara, camiseta negra */
+const JP_SKIN='#f0c8a8';
+const WALK_X=170, WALK_T=2.4;
+function ballLogo(x,y,s=1){
+  return `<g transform="translate(${x},${y}) scale(${s})">
+   <rect x="-13" y="-17" width="26" height="12" fill="none" stroke="#c1121f" stroke-width="2.5"/>
+   <path d="M-8 -5 L-6 4 M0 -5 V5 M8 -5 L6 4" stroke="#999" stroke-width="1.5"/>
+   <circle cx="2" cy="7" r="10" fill="#f08a24" ${K2}/>
+   <path d="M-8 7 H12 M2 -3 V17 M-5 0 Q2 7 -5 14 M9 0 Q2 7 9 14" stroke="#000" stroke-width="1.5" fill="none"/></g>`;
+}
+
+function headFront(o={}){
+  const e=o.expr||'normal', lx=o.look||0;
+  let eyes,mouth,brows;
+  if(e==='scared'){
+    eyes=`<circle cx="-11" cy="0" r="8" fill="#fff" ${K2}/><circle cx="11" cy="0" r="8" fill="#fff" ${K2}/><circle cx="${-11+lx}" cy="1" r="2.8" fill="#000"/><circle cx="${11+lx}" cy="1" r="2.8" fill="#000"/>`;
+    brows=`<path d="M-20 -15 L-5 -12 M20 -15 L5 -12" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>`;
+    mouth=`<ellipse cx="0" cy="18" rx="7" ry="9" fill="#5a0d0d" ${K2}/>`;
+  }else if(e==='dizzy'){
+    eyes=`<path d="M-16 0 Q-11 -4 -6 0 M6 0 Q11 -4 16 0" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    brows=`<path d="M-18 -10 L-5 -7 M18 -10 L5 -7" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>`;
+    mouth=`<path d="M-7 18 Q0 14 7 18" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  }else{
+    eyes=`<ellipse cx="-11" cy="0" rx="6" ry="7" fill="#fff" ${K2}/><ellipse cx="11" cy="0" rx="6" ry="7" fill="#fff" ${K2}/><circle cx="${-11+lx}" cy="1" r="2.8" fill="#000"/><circle cx="${11+lx}" cy="1" r="2.8" fill="#000"/>`;
+    brows=`<path d="M-17 -11 L-5 -11 M17 -11 L5 -11" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>`;
+    mouth=`<path d="M-8 16 Q0 22 8 16" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  }
+  return `
+  <circle cx="${o.round?-34:-31}" cy="3" r="7" fill="${o.skin||SKIN}" ${K}/><circle cx="${o.round?34:31}" cy="3" r="7" fill="${o.skin||SKIN}" ${K}/>
+  ${o.round?`<ellipse rx="35" ry="32" cy="1" fill="${o.skin||SKIN}" ${K}/>`:`<circle r="31" fill="${o.skin||SKIN}" ${K}/>`}
+  ${o.cap?`<path d="M-32 -4 Q-33 -43 0 -43 Q33 -43 32 -4 Q16 -15 0 -15 Q-16 -15 -32 -4Z" fill="${o.cap}" ${K}/><path d="M-12 -40 Q0 -46 12 -40" stroke="#fff" stroke-width="3" fill="none"/>`
+         :o.fade?`<path d="M-31 2 Q-34 -26 -26 -30 Q-12 -38 0 -38 Q12 -38 26 -30 Q34 -26 31 2 Q28 -14 22 -18 Q0 -26 -22 -18 Q-28 -14 -31 2Z" fill="${o.hair||'#1d1712'}" opacity=".35"/>
+                   <path d="M-25 -16 Q-27 -36 -10 -40 Q0 -44 12 -41 Q28 -36 25 -16 Q14 -24 6 -21 Q-2 -26 -10 -21 Q-18 -24 -25 -16Z" fill="${o.hair||'#1d1712'}" ${K}/>`
+         :`<path d="M-32 -2 Q-36 -40 0 -40 Q36 -40 32 -2 Q27 -20 12 -22 L6 -16 L0 -23 Q-24 -24 -32 -2Z" fill="${o.hair||'#1d1712'}" ${K}/>`}
+  <g class="eyes">${eyes}</g>${brows}
+  ${o.glasses?`<rect x="-22" y="-9" width="20" height="18" rx="5" fill="#cfe8ff" fill-opacity=".18" stroke="#000" stroke-width="3.5"/><rect x="2" y="-9" width="20" height="18" rx="5" fill="#cfe8ff" fill-opacity=".18" stroke="#000" stroke-width="3.5"/>
+               <path d="M-2 -2 H2 M-22 -3 L-30 -2 M22 -3 L30 -2" stroke="#000" stroke-width="3"/>`:''}
+  <path d="M0 4 Q5 9 0 11" stroke="${SKIN_D}" stroke-width="2.5" fill="none"/>
+  <g class="mouth">${mouth}${e==="normal"?`<ellipse class="mo" cx="0" cy="17" rx="7" ry="6" fill="#5a0d0d" ${K2}/>`:""}</g>`;
+}
+
+function headSide(o={}){
+  const sc=o.expr==='scared';
+  return `
+  <circle r="30" fill="${o.skin||SKIN}" ${K}/>
+  <path d="M-29 -2 Q-39 6 -29 10" fill="${o.skin||SKIN}" ${K2}/>
+  ${o.wavy?`<path d="M-30 -10 Q-34 -30 -22 -40 Q-14 -52 0 -46 Q8 -56 20 -46 Q34 -44 34 -28 Q40 -14 31 2 Q30 12 24 16 Q22 -2 10 -10 Q-6 -16 -16 -12 Q-24 -16 -30 -10Z" fill="#1a1412" ${K}/>
+             <path d="M-14 -38 Q-6 -44 2 -38 M8 -42 Q16 -46 22 -38" stroke="#4a3a34" stroke-width="2.5" fill="none"/>`:
+    o.cap?`<path d="M-31 -8 Q-31 -42 2 -42 Q33 -40 32 -6 Z" fill="${o.cap}" ${K}/><path d="M27 -22 L52 -15 L29 -8 Z" fill="${o.cap}" ${K}/>`
+         :`<path d="M-28 -10 Q-26 -37 4 -35 Q33 -31 30 0 Q29 12 22 18 Q19 -6 6 -16 Q-12 -21 -28 -10Z" fill="${o.hair||'#1d1712'}" ${K}/>`}
+  <circle cx="8" cy="3" r="6" fill="${o.skin||SKIN}" ${K2}/>
+  ${sc?`<circle cx="-15" cy="-3" r="8" fill="#fff" ${K2}/><circle cx="-19" cy="-3" r="2.8" fill="#000"/><path d="M-26 -17 L-7 -13" stroke="#000" stroke-width="${o.wavy?5:3.5}" stroke-linecap="round"/>`
+      :`<circle cx="-17" cy="-2" r="3.2" fill="#000"/>`}
+  <g class="mouth">${sc?`<ellipse cx="-20" cy="17" rx="5" ry="7.5" fill="#5a0d0d" ${K2}/>`:`<path d="M-25 16 Q-19 19 -13 16" stroke="#000" stroke-width="2.5" fill="none"/>`}</g>`;
+}
+
+/* brazo o pierna curva con contorno negro */
+const limb=(d,c,w)=>`<path d="${d}" stroke="#000" stroke-width="${w+6}" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+/* personaje cabezón de pie, de frente; (0,0) = pies */
+function chibi(o={}){
+  const shirt=o.shirt||'#2f6db0', pants=o.pants||'#26324a';
+  if(o.juan){
+    const sk=o.skin||SKIN;
+    const leg=(x,cls)=>`<g class="${cls}">${limb(`M${x} -44 Q${x-1} -24 ${x} -9`,sk,13)}
+      <path d="M${x-12} -1 Q${x-13} -12 ${x-4} -13 L${x+5} -13 Q${x+11} -9 ${x+12} -1Z" fill="#f4f4f4" ${K2}/><path d="M${x-12} -3 H${x+12}" stroke="#000" stroke-width="2"/></g>`;
+    return `
+  ${leg(-13,'legL')}${leg(13,'legR')}
+  <path d="M-32 -76 Q0 -70 32 -76 L34 -40 Q20 -38 4 -40 L0 -50 L-4 -40 Q-20 -38 -34 -40Z" fill="#1f2229" ${K}/>
+  <g class="armL">${limb('M-44 -108 Q-52 -86 -47 -66',sk,12)}<ellipse cx="-47" cy="-60" rx="7" ry="8" fill="${sk}" ${K2}/></g>
+  <g class="armR">${limb('M44 -108 Q52 -86 47 -66',sk,12)}<ellipse cx="47" cy="-60" rx="7" ry="8" fill="${sk}" ${K2}/></g>
+  <path d="M-10 -132 Q0 -126 10 -132 Q26 -130 38 -122 Q48 -114 54 -96 L40 -90 L36 -100 Q37 -84 36 -68 Q0 -60 -36 -68 Q-37 -84 -36 -100 L-40 -90 L-54 -96 Q-48 -114 -38 -122 Q-26 -130 -10 -132Z" fill="${JUAN_SHIRT}" ${K}/>
+  <path d="M-10 -132 Q0 -122 10 -132" fill="none" ${K2}/>
+  <path d="M-24 -84 Q-20 -76 -26 -70 M22 -110 Q26 -100 24 -92" stroke="#b9ae90" stroke-width="2" fill="none"/>
+  ${ballLogo(0,-100,.95)}
+  <g transform="translate(0,-164) scale(1.05)">${headFront(o)}</g>`;
+  }
+  return `
+  <rect x="-17" y="-48" width="14" height="44" rx="4" fill="${pants}" ${K}/><rect x="3" y="-48" width="14" height="44" rx="4" fill="${pants}" ${K}/>
+  <ellipse cx="-12" cy="-4" rx="12" ry="6" fill="#222" ${K2}/><ellipse cx="12" cy="-4" rx="12" ry="6" fill="#222" ${K2}/>
+  <rect x="-35" y="-92" width="13" height="42" rx="6" fill="${shirt}" ${K}/><rect x="22" y="-92" width="13" height="42" rx="6" fill="${shirt}" ${K}/>
+  <circle cx="-28" cy="-48" r="7" fill="${o.skin||SKIN}" ${K2}/><circle cx="28" cy="-48" r="7" fill="${o.skin||SKIN}" ${K2}/>
+  <rect x="-25" y="-98" width="50" height="56" rx="12" fill="${shirt}" ${K}/>
+  <path d="M-8 -98 L0 -88 L8 -98" fill="#fff" ${K2}/>
+  <g transform="translate(0,-130) scale(1.12)">${headFront(o)}</g>`;
+}
+
+/* persona sentada de lado (mirando a la izquierda); (0,0) = cadera */
+function personSide(o={}){
+  const shirt=o.shirt||'#2f6db0', pants=o.pants||'#26324a';
+  const ropes = o.tied ? `
+    <path d="M-22 -48 L62 -48 M-22 -30 L62 -30" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+    <path d="M-22 -48 L62 -48 M-22 -30 L62 -30" stroke="#c99a52" stroke-width="5" stroke-linecap="round"/>
+    <path d="M-62 30 L-46 30 M-62 44 L-46 44" stroke="#c99a52" stroke-width="5" stroke-linecap="round"/>` : '';
+  return `
+  <rect x="46" y="-100" width="12" height="104" rx="4" fill="#3a3a3a" ${K}/>
+  ${o.extraBehind||''}
+  <rect x="-12" y="0" width="72" height="12" rx="3" fill="#3a3a3a" ${K}/>
+  <rect x="22" y="12" width="8" height="55" fill="#2a2a2a" ${K2}/><rect x="-5" y="64" width="62" height="6" rx="3" fill="#2a2a2a" ${K2}/>
+  <path d="M5 0 L-55 0 L-55 64" stroke="#000" stroke-width="27" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M5 0 L-55 0 L-55 64" stroke="${pants}" stroke-width="21" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="-63" cy="72" rx="17" ry="7" fill="#222" ${K2}/>
+  <path d="M-18 -72 Q8 -82 28 -66 L30 4 L-16 4Z" fill="${shirt}" ${K}/>
+  <path d="M6 -58 L34 -46 L50 -40" stroke="#000" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M6 -58 L34 -46 L50 -40" stroke="${shirt}" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="54" cy="-40" r="8" fill="${o.skin||SKIN}" ${K2}/>
+  ${ropes}
+  <g transform="translate(0,-110)">${headSide(o)}</g>`;
+}
+
+/* Juan Pablo en cuatro patas, amarrado al piso, con el palo de escoba detrás (coordenadas de la pantalla de la tele 420x320) */
+function jpFours(){
+  const P='#3a4a6a', SH='#1b1b1b', SK=JP_SKIN;
+  const limb=(d,c,w)=>`<path d="${d}" stroke="#000" stroke-width="${w+6}" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return `
+  <rect x="78" y="236" width="10" height="26" fill="#8a5a2b" ${K2}/><rect x="292" y="236" width="10" height="26" fill="#8a5a2b" ${K2}/>
+  ${limb('M136 186 L128 220 L118 246',SH,15)}<circle cx="114" cy="248" r="8" fill="${SK}" ${K2}/>
+  ${limb('M226 196 L214 246 L276 248',P,20)}
+  <ellipse cx="236" cy="186" rx="30" ry="27" fill="${P}" ${K}/>
+  <path d="M214 172 Q236 160 258 176" stroke="#000" stroke-width="2" fill="none"/>
+  <path d="M104 172 Q170 150 236 164 Q252 186 232 204 Q170 214 110 204 Q94 188 104 172Z" fill="${SH}" ${K}/>
+  ${limb('M206 200 L196 248 L262 250',P,20)}<ellipse cx="270" cy="250" rx="16" ry="7" fill="#f2f2f2" ${K2}/>
+  ${limb('M118 186 L108 220 L98 246',SH,15)}<circle cx="94" cy="248" r="8" fill="${SK}" ${K2}/>
+  <path d="M84 246 Q96 240 108 248 M262 246 Q280 240 296 248" stroke="#000" stroke-width="7" fill="none"/>
+  <path d="M84 246 Q96 240 108 248 M262 246 Q280 240 296 248" stroke="#c99a52" stroke-width="4" fill="none"/>
+  <rect x="96" y="160" width="16" height="16" fill="${SK}" ${K2}/>
+  <g class="jp" transform="translate(92,140) scale(-1,1)">${headSide({wavy:true,skin:SK,expr:'scared'})}</g>
+  <path class="sweat" d="M64 116 Q60 124 64 128 Q68 124 64 116Z" fill="#9fd3ff" ${K2}/>
+  <g class="broom"><rect x="272" y="182" width="170" height="9" rx="4" fill="#d9b07a" ${K2}/><path d="M272 182 L260 186.5 L272 191Z" fill="#d9b07a" ${K2}/>
+    <path d="M430 168 L480 154 L480 218 L430 204Z" fill="#e6cf7e" ${K}/></g>
+  <path d="M262 160 l6 -10 M276 164 l10 -8 M266 206 l8 8" stroke="#ff3b3b" stroke-width="3" stroke-linecap="round"/>`;
+}
+
+/* encapuchado con máscara de cerdo; (0,0) = centro de la cara */
+function pig(o={}){
+  return `
+  <path d="M-58 62 Q0 30 58 62 L72 175 L-72 175Z" fill="#1c1c1c" ${K}/>
+  ${o.arms?`<path d="M-50 75 Q-120 70 -170 40" stroke="#000" stroke-width="32" fill="none" stroke-linecap="round"/><path d="M-50 75 Q-120 70 -170 40" stroke="#1c1c1c" stroke-width="26" fill="none" stroke-linecap="round"/><circle cx="-175" cy="38" r="16" fill="#2c2c2c" ${K}/>
+            <path d="M50 80 Q-40 120 -150 95" stroke="#000" stroke-width="32" fill="none" stroke-linecap="round"/><path d="M50 80 Q-40 120 -150 95" stroke="#1c1c1c" stroke-width="26" fill="none" stroke-linecap="round"/><circle cx="-156" cy="95" r="16" fill="#2c2c2c" ${K}/>`:''}
+  <path d="M-46 -6 Q-52 -62 0 -64 Q52 -62 46 -6 Q48 48 0 56 Q-48 48 -46 -6Z" fill="#262626" ${K}/>
+  <path d="M-30 -26 L-44 -54 L-12 -38Z" fill="#e08f8f" ${K}/><path d="M30 -26 L44 -54 L12 -38Z" fill="#e08f8f" ${K}/>
+  <ellipse cx="0" cy="2" rx="33" ry="37" fill="#f0a9a5" ${K}/>
+  <ellipse cx="-13" cy="-8" rx="6.5" ry="7.5" fill="#000"/><ellipse cx="13" cy="-8" rx="6.5" ry="7.5" fill="#000"/>
+  <circle cx="-11" cy="-10" r="1.8" fill="#ff3030"/><circle cx="15" cy="-10" r="1.8" fill="#ff3030"/>
+  <ellipse cx="0" cy="15" rx="16" ry="12" fill="#f7c4c0" ${K}/>
+  <ellipse cx="-6" cy="15" rx="3" ry="5" fill="#5a2a28"/><ellipse cx="6" cy="15" rx="3" ry="5" fill="#5a2a28"/>
+  <path d="M-12 32 Q0 37 12 32" stroke="#000" stroke-width="2.5" fill="none"/>`;
+}
+
+/* plano en el monitor (200x125) */
+function blueprint(){
+  return `
+  <defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" fill="none" stroke="#2c6aa0" stroke-width=".5"/></pattern></defs>
+  <rect width="200" height="125" fill="#0b3d6b"/><rect width="200" height="125" fill="url(#grid)"/>
+  <g transform="translate(58,58)"><g class="spin">
+    <circle r="28" fill="none" stroke="#cfe8ff" stroke-width="10" stroke-dasharray="7 6"/>
+    <circle r="22" fill="#0b3d6b" stroke="#cfe8ff" stroke-width="1.3"/><circle r="7" fill="none" stroke="#cfe8ff" stroke-width="1.3"/>
+    <path d="M0 -22V22M-22 0H22" stroke="#cfe8ff" stroke-width=".5" stroke-dasharray="3 2"/></g></g>
+  <g transform="translate(111,40)"><g class="spinr">
+    <circle r="17" fill="none" stroke="#cfe8ff" stroke-width="7" stroke-dasharray="5 5"/>
+    <circle r="13" fill="#0b3d6b" stroke="#cfe8ff" stroke-width="1.2"/><circle r="4" fill="none" stroke="#cfe8ff" stroke-width="1.2"/></g></g>
+  <path d="M30 100H86M30 96V104M86 96V104" stroke="#cfe8ff" stroke-width=".8"/>
+  <text x="50" y="97" font-size="7" fill="#cfe8ff" font-family="monospace">Ø56</text>
+  <path d="M140 20 L185 20 L185 70" stroke="#cfe8ff" stroke-width=".8" fill="none" stroke-dasharray="2 2"/>
+  <text x="150" y="16" font-size="6" fill="#cfe8ff" font-family="monospace">±0.02</text>
+  <rect x="138" y="92" width="58" height="29" fill="none" stroke="#cfe8ff" stroke-width=".8"/>
+  <path d="M138 101H196M138 111H196" stroke="#cfe8ff" stroke-width=".5"/>
+  <text x="141" y="99" font-size="5.4" fill="#cfe8ff" font-family="monospace">J. ATENCIA</text>
+  <text x="141" y="108.5" font-size="4.6" fill="#cfe8ff" font-family="monospace">ING. MECÁNICA</text>
+  <text x="141" y="118" font-size="4.6" fill="#cfe8ff" font-family="monospace">ESC 1:2  H.1/1</text>`;
+}
+
+function floorTiles(y0,y1,vx,vy){
+  let s='';
+  for(let x=-800;x<=1600;x+=90){const k=(y0-vy)/(y1-vy);s+=`M${vx+(x-vx)*k} ${y0}L${x} ${y1}`}
+  let y=y0,h=14;while(y<y1){y+=h;h*=1.35;s+=`M0 ${Math.min(y,y1)}H800`}
+  return `<path d="${s}" stroke="#a9a9a9" stroke-width="2" fill="none"/>`;
+}
+
+function burst(cx,cy,n,r1,r2){
+  let p=[];for(let k=0;k<n*2;k++){const a=k*Math.PI/n,r=k%2?r2:r1;p.push((cx+Math.cos(a)*r).toFixed(1)+','+(cy+Math.sin(a)*r).toFixed(1))}
+  return p.join(' ');
+}
+
+/* fondo de la sala de la trampa; g = estado del juego (qué está abierto/recogido) */
+function salaBG(s,g){
+  g=g||{};const hs=id=>g.game?`data-hs="${id}" style="cursor:pointer"`:'';
+  return `
+   <polygon points="0,0 800,0 650,40 150,40" fill="#5f5e35" ${K}/>
+   <polygon points="0,0 150,40 150,290 0,380" fill="#83824a" ${K}/>
+   <polygon points="800,0 650,40 650,290 800,380" fill="#83824a" ${K}/>
+   <rect x="150" y="40" width="500" height="250" fill="#a2a15e" ${K}/>
+   <polygon points="0,380 150,290 650,290 800,380" fill="#d8d3ae" ${K}/>
+   <path d="M232 64 L252 96 L240 132 M252 96 L278 104 M566 196 L586 228 L574 262 M60 120 L82 152 L70 194 M700 70 L718 104 L706 140" stroke="#000" stroke-width="2" fill="none"/>
+   <g ${hs('bricks')}>${g.bricks
+     ?`<rect x="522" y="58" width="76" height="40" fill="#1a1a14" ${K2}/><path d="M530 98 L590 98" stroke="#000" stroke-width="2"/>`
+     :`<rect x="512" y="50" width="96" height="56" fill="transparent"/><g fill="#7d7d73" stroke="#000" stroke-width="2"><rect x="520" y="58" width="30" height="12"/><rect x="552" y="58" width="30" height="12"/><rect x="536" y="72" width="30" height="12"/><rect x="568" y="72" width="30" height="12"/><rect x="552" y="86" width="30" height="12"/></g>`}</g>
+   <g fill="#7d7d73" stroke="#000" stroke-width="2"><rect x="180" y="200" width="28" height="11"/><rect x="196" y="213" width="28" height="11"/></g>
+   <g ${hs('door')}>
+     <path d="M352 290 V196 Q400 140 448 196 V290Z" fill="#111" ${K}/>
+     ${g.door?`<path d="M372 290 L400 200 L428 290Z" fill="#fff6c0" opacity=".22"/>`
+      :`<path d="M368 290V176M384 290V160M400 290V155M416 290V160M432 290V176" stroke="#8a8a8a" stroke-width="5"/>
+        <rect x="388" y="222" width="24" height="20" rx="3" fill="#e9b949" ${K2}/><path d="M393 222 V214 Q400 204 407 214 V222" stroke="#000" stroke-width="3" fill="none"/>`}
+   </g>
+   <path d="M40 352 L40 236 Q70 168 104 214 L104 318Z" fill="#111" ${K} ${hs('arch')}/>
+   <g ${hs('vault')}>${g.vault
+     ?`<path d="M690 306 L690 120 Q730 96 762 110 L762 342Z" fill="#141414" ${K}/><path d="M696 214 H756" stroke="#555" stroke-width="4"/>
+       ${g.key?'':`<g transform="translate(726,200)">${ITEMS.llavec.icon}</g>`}
+       <path d="M762 110 L798 92 L798 362 L762 342Z" fill="#a8b0b5" ${K}/>`
+     :`<path d="M690 306 L690 120 Q730 96 762 110 L762 342Z" fill="#a8b0b5" ${K}/>
+       <circle cx="726" cy="220" r="18" fill="none" stroke="#000" stroke-width="4"/><path d="M726 202V238M708 220H744" stroke="#000" stroke-width="3"/>
+       <g fill="#555"><circle cx="700" cy="140" r="3"/><circle cx="700" cy="180" r="3"/><circle cx="700" cy="260" r="3"/><circle cx="700" cy="296" r="3"/><circle cx="752" cy="130" r="3"/><circle cx="752" cy="330" r="3"/></g>`}</g>
+   <g fill="#8d8a76" stroke="#000" stroke-width="2"><polygon points="430,312 484,312 482,322 426,322"/><polygon points="560,350 628,350 640,364 566,364"/><polygon points="180,312 230,312 222,322 170,322"/></g>
+   <g ${hs('tile')}><rect x="282" y="326" width="90" height="28" fill="transparent"/>
+     <polygon points="300,334 364,334 356,346 290,346" fill="${g.tile?'#2a281e':'#8d8a76'}" stroke="#000" stroke-width="2"/>
+     ${g.tile?'':`<path d="M300 333 L364 333" stroke="#fff" stroke-width="1.5" opacity=".5"/>`}</g>
+   <ellipse cx="430" cy="356" rx="54" ry="10" fill="#8a1c1c" opacity=".5" ${hs('puddle')}/>
+   <path d="M400 40V78" stroke="#000" stroke-width="3"/>
+   <g class="flk"><circle cx="400" cy="92" r="240" fill="url(#bulbg)" pointer-events="none"/><circle cx="400" cy="90" r="11" fill="#fff6a8" ${K}/></g>
+   <g ${hs('tv')}>
+   <rect x="508" y="292" width="92" height="40" fill="#a0703c" ${K}/><path d="M508 312H600M538 292V332M570 292V332" stroke="#000" stroke-width="2"/>
+   <path d="M532 224 L514 192 M572 224 L592 190" stroke="#000" stroke-width="3"/>
+   <rect x="500" y="222" width="108" height="72" rx="10" fill="#5a3d24" ${K}/>
+   <rect x="510" y="232" width="72" height="52" rx="8" fill="${s.tvon?'#ccc':'#1a1a1a'}" ${s.tvon?'filter="url(#nz)"':''}/>
+   <rect x="510" y="232" width="72" height="52" rx="8" fill="none" ${K2}/>
+   <circle cx="595" cy="244" r="4" fill="#222"/><circle cx="595" cy="262" r="4" fill="#222"/>
+   </g>`;
+}
+
+/* barra negra de inventario (como en los juegos de Inkagames); g = estado del juego */
+function invBar(g){
+  let slots='';const N=9,pages=g?Math.max(1,Math.ceil(g.inv.length/N)):1;
+  if(g){g.page=Math.min(g.page||0,pages-1)}const p0=g?(g.page||0)*N:0;
+  for(let j=0;j<N;j++){const k=p0+j;
+    const it=g&&g.inv[k], sel=it&&g.sel===it;
+    slots+=`<g ${g?`data-inv="${k}" style="cursor:pointer"`:''}><rect x="${86+j*60}" y="392" width="48" height="46" rx="4" fill="${sel?'#ffe25e':'#111'}" stroke="${sel?'#fff':'#3a3a3a'}" stroke-width="2"/>
+      ${it?`<g transform="translate(${110+j*60},415)">${ITEMS[it].icon}</g>`:''}</g>`;
+  }
+  if(g&&pages>1)slots+=`<g data-hs="invpage" style="cursor:pointer"><rect x="628" y="392" width="66" height="46" rx="6" fill="#333" stroke="#fff" stroke-width="2"/>
+    <text x="661" y="414" text-anchor="middle" font-size="18" font-weight="700" fill="#ffe25e" font-family="'Comic Neue',cursive">▶</text><text x="661" y="432" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="'Comic Neue',cursive">${(g.page||0)+1} / ${pages}</text></g>`;
+  if(g&&typeof hubButton==='function')slots+=hubButton();
+  return `<rect y="380" width="800" height="70" fill="#000"/>
+   <g ${g?'data-hs="map" style="cursor:pointer"':''}><rect x="16" y="392" width="54" height="46" rx="4" fill="#fff" ${K}/>
+   <path d="M24 402H40V414H52V402H62M24 428H44V418M52 418V428H62M24 402V428M62 402V428" stroke="#000" stroke-width="2.5" fill="none"/></g>
+   ${slots}`;
+}
+function avatar(){
+  return `<circle cx="36" cy="36" r="26" fill="#3dbb3d" ${K}/><g transform="translate(36,42) scale(.62)">${headFront(JUAN)}</g>`;
+}
+function arrow(x,y,rot,sc=1){
+  return `<g transform="translate(${x},${y})"><g class="bob"><g transform="rotate(${rot}) scale(${sc})"><rect x="-30" y="-30" width="60" height="60" fill="transparent"/><path d="M-14 -10 H6 V-20 L26 0 L6 20 V10 H-14Z" fill="#e01b1b" ${K}/></g></g></g>`;
+}
+
+const svg=(inner,bg='#000')=>`<svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+ <radialGradient id="bulbg"><stop offset="0" stop-color="#fff6c0" stop-opacity=".5"/><stop offset="1" stop-color="#fff6c0" stop-opacity="0"/></radialGradient>
+ <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="2" fill="#000" opacity=".25"/></pattern>
+ <filter id="nz"><feTurbulence id="nzT" type="fractalNoise" baseFrequency=".85" numOctaves="1" seed="3"/><feColorMatrix type="saturate" values="0"/></filter>
+</defs>
+<rect width="800" height="450" fill="${bg}"/>
+${inner}
+</svg>`;
+
+const SC={
+  negro:()=>svg('','#000'),
+
+  /* cuarto de Juan (como la intro de Fernanfloo) */
+  cuarto:(s)=>svg(`
+   <rect width="800" height="300" fill="#f1e3bc"/>
+   <rect y="300" width="800" height="150" fill="#eeeeee"/>
+   ${floorTiles(300,450,400,120)}
+   <rect y="288" width="800" height="12" fill="#b99f6b" ${K}/>
+   <rect x="30" y="44" width="168" height="132" fill="#fff" ${K}/>
+   <rect x="40" y="54" width="148" height="112" fill="#16204a" ${K2}/>
+   <circle cx="150" cy="84" r="15" fill="#f4f0cc"/><circle cx="143" cy="79" r="14" fill="#16204a"/>
+   <circle cx="66" cy="72" r="2" fill="#fff"/><circle cx="90" cy="140" r="1.6" fill="#fff"/><circle cx="170" cy="146" r="2" fill="#fff"/>
+   <path d="M114 54V166M40 110H188" stroke="#fff" stroke-width="7"/>
+   <g transform="rotate(-3 266 102)">
+     <rect x="222" y="40" width="92" height="124" fill="#c1121f" ${K}/>
+     <rect x="242" y="64" width="52" height="40" rx="6" fill="#fff" ${K2}/><circle cx="268" cy="84" r="10" fill="none" ${K2}/>
+     <text x="268" y="148" font-family="Creepster,cursive" font-size="30" fill="#fff" text-anchor="middle" stroke="#000" stroke-width="1.5">V8</text>
+   </g>
+   <rect x="334" y="56" width="96" height="70" fill="#1d5fa0" ${K}/>
+   <circle cx="366" cy="92" r="20" fill="none" stroke="#fff" stroke-width="6" stroke-dasharray="5 4"/><circle cx="402" cy="80" r="12" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="4 3"/>
+   <rect x="462" y="126" width="128" height="9" fill="#8a4b2f" ${K}/>
+   <rect x="488" y="104" width="50" height="16" rx="6" fill="#e01b1b" ${K2}/><path d="M498 104 L506 94 H522 L530 104" fill="#9fd3ff" ${K2}/>
+   <circle cx="499" cy="121" r="6" fill="#222" ${K2}/><circle cx="528" cy="121" r="6" fill="#222" ${K2}/>
+   <rect x="552" y="98" width="22" height="28" rx="3" fill="#ffd34d" ${K2}/>
+   <path d="M400 0V24" stroke="#000" stroke-width="3"/><circle cx="400" cy="34" r="11" fill="#fff6a8" ${K}/>
+   ${s.pig?`<rect x="640" y="66" width="130" height="234" fill="#0d0d0d" ${K}/>
+            <g transform="translate(705,168) scale(.8)">${pig()}</g>
+            <path d="M770 66 L800 54 L800 314 L770 300Z" fill="#7a2632" ${K}/>`
+          :`<rect x="640" y="66" width="130" height="234" fill="#7a2632" ${K}/>
+            <rect x="656" y="84" width="98" height="86" fill="none" ${K2}/><rect x="656" y="184" width="98" height="100" fill="none" ${K2}/>
+            <circle cx="752" cy="190" r="7" fill="#e9b949" ${K2}/>
+            <path d="M676 92 L668 150 L700 150 L692 92Z" fill="#3e6fb0" ${K2}/><circle cx="684" cy="90" r="4" fill="#222"/>`}
+   <rect x="438" y="132" width="104" height="126" rx="16" fill="#2b2b2b" ${K}/>
+   <path d="M444 264 L446 216 Q448 196 470 192 Q490 198 510 192 Q532 196 534 216 L536 264Z" fill="${JUAN_SHIRT}" ${K}/><path d="M480 194 Q490 202 500 194" fill="none" ${K2}/>${ballLogo(490,226,1)}
+   <path d="M466 212 Q440 236 424 248" stroke="#000" stroke-width="18" fill="none" stroke-linecap="round"/><path d="M466 212 Q440 236 424 248" stroke="${JUAN.skin}" stroke-width="12" fill="none" stroke-linecap="round"/>
+   <path d="M516 212 Q480 240 452 250" stroke="#000" stroke-width="18" fill="none" stroke-linecap="round"/><path d="M516 212 Q480 240 452 250" stroke="${JUAN.skin}" stroke-width="12" fill="none" stroke-linecap="round"/>
+   <g class="juan" transform="translate(490,148) scale(1.3)">${headFront({...JUAN,look:-4,expr:s.scared?'scared':''})}</g>
+   <rect x="220" y="250" width="352" height="16" rx="3" fill="#9a5634" ${K}/>
+   <rect x="232" y="266" width="328" height="98" fill="#7c3f24" ${K}/>
+   <rect x="462" y="278" width="86" height="34" fill="#8b4a2b" ${K2}/><rect x="462" y="320" width="86" height="34" fill="#8b4a2b" ${K2}/>
+   <rect x="496" y="292" width="18" height="5" rx="2" fill="#e9b949"/><rect x="496" y="334" width="18" height="5" rx="2" fill="#e9b949"/>
+   <path d="M300 364 Q286 400 318 418 Q348 436 330 450 M322 364 Q344 396 312 428 M350 364 Q360 410 390 450" stroke="#000" stroke-width="3" fill="none"/>
+   <rect x="404" y="242" width="66" height="9" rx="2" fill="#444" ${K2}/>
+   <circle class="tap1" cx="424" cy="248" r="7" fill="${JUAN.skin}" ${K2}/><circle class="tap2" cx="452" cy="250" r="7" fill="${JUAN.skin}" ${K2}/>
+   <polygon points="298,160 392,172 392,240 298,246" fill="#3c3c3c" ${K}/>
+   <polygon points="392,172 404,170 404,242 392,240" fill="#8fc6ff" ${K}/>
+   <rect x="334" y="243" width="24" height="9" fill="#333" ${K2}/>
+   <rect x="246" y="222" width="22" height="28" rx="3" fill="#fff" ${K}/><path d="M268 228 Q280 236 268 244" stroke="#000" stroke-width="3" fill="none"/>
+   <rect x="276" y="236" width="40" height="13" rx="6" fill="#6aa8e8" ${K2}/>
+   <rect width="800" height="450" fill="#0a1030" opacity=".12"/>
+  `),
+
+  monitor:(s)=>svg(`
+   <rect width="800" height="450" fill="#7c3f24"/>
+   <rect x="74" y="22" width="652" height="396" rx="16" fill="#2a2a2a" ${K}/>
+   <g transform="translate(100,46) scale(3,2.78)">${blueprint()}</g>
+   <rect x="100" y="46" width="600" height="348" fill="none" ${K}/>
+   ${s.pig?`<g opacity=".35"><g transform="translate(575,215) scale(1.7)">${pig()}</g></g>`:''}
+   <path d="M100 46 L330 46 L160 394 L100 394Z" fill="#fff" opacity=".04"/>
+   <path d="M300 300 L312 330 L317 318 L330 318Z" fill="#fff" ${K2}/>
+  `),
+
+  grito:()=>svg(`
+   <rect width="800" height="450" fill="#ffd02e"/>
+   <polygon points="${burst(400,225,20,520,330)}" fill="#ff5a2e" ${K}/>
+   <g class="juan" transform="translate(250,262) scale(2.7)">${headFront({...JUAN,expr:'scared',look:3})}</g>
+   <g transform="translate(640,175) scale(1.85)">${pig({arms:true})}</g>
+   <text x="400" y="78" font-family="'Comic Neue',cursive" font-weight="700" font-size="72" fill="#fff" stroke="#000" stroke-width="6" paint-order="stroke" text-anchor="middle" transform="rotate(-4 400 60)">¡¡AAAAAHHH!!</text>
+  `),
+
+  /* sala de la trampa (estilo Inkagames) */
+  sala:(s)=>svg(`
+   ${salaBG(s)}
+   ${(()=>{
+     const jx0=s.walk?0:(s.jx||0), jx1=s.walk?WALK_X:jx0;
+     const cd=j=>`M${250+j} 344 Q${190+j*.4} ${372-j*.08} 122 314`;
+     const anim=(a,b)=>s.walk?`<animate attributeName="d" from="${a}" to="${b}" dur="${WALK_T}s" fill="freeze"/>`:'';
+     return `
+   <path d="${cd(jx0)}" stroke="#000" stroke-width="7" fill="none">${anim(cd(jx0),cd(jx1))}</path>
+   <path d="${cd(jx0)}" stroke="#9a9a9a" stroke-width="4" fill="none" stroke-dasharray="9 4">${anim(cd(jx0),cd(jx1))}</path>
+   <circle cx="120" cy="310" r="8" fill="none" stroke="#000" stroke-width="5"/><circle cx="120" cy="310" r="8" fill="none" stroke="#9a9a9a" stroke-width="2.5"/>
+   <g transform="translate(${jx0},0)">${s.walk?`<animateTransform attributeName="transform" type="translate" from="0 0" to="${WALK_X} 0" dur="${WALK_T}s" fill="freeze"/>`:''}
+     <g class="juan" transform="translate(262,354) scale(.95)"><g class="breathe">${chibi({...JUAN,juan:true,expr:s.scared?'scared':'dizzy',look:s.jx||s.walk?3:0})}</g></g>
+     <rect x="240" y="336" width="20" height="8" fill="#9a9a9a" ${K2}/>
+   </g>`})()}
+   ${s.arrows?arrow(400,322,-90,.8)+arrow(118,344,180,.8):''}
+   ${invBar()}${avatar()}
+  `,'#000'),
+
+  tv:(s)=>{
+    let c='';
+    if(s.tv==='static') c=`<rect width="420" height="320" fill="#ccc" filter="url(#nz)"/>`;
+    else if(s.tv==='off') c=`<rect width="420" height="320" fill="#050505"/><rect x="150" y="157" width="120" height="5" fill="#fff" opacity=".8"/>`;
+    else if(s.tv==='puppet') c=`
+      <rect width="420" height="320" fill="#5a0a0a"/>
+      <polygon points="${burst(210,150,16,300,190)}" fill="#7a1010"/>
+      <path d="M80 320 Q210 248 340 320Z" fill="#1c1c1c" ${K}/>
+      <path d="M182 282 L210 292 L238 282 L238 304 L210 296 L182 304Z" fill="#d0141f" ${K2}/>
+      <path d="M150 50 L132 10 L180 34Z M270 50 L288 10 L240 34Z" fill="#e08f8f" ${K}/>
+      <ellipse cx="210" cy="140" rx="92" ry="104" fill="#f6f1e4" ${K}/>
+      <path d="M122 110 Q130 32 210 34 Q290 32 298 110 Q270 70 210 66 Q150 70 122 110Z" fill="#111" ${K}/>
+      <ellipse cx="176" cy="122" rx="17" ry="19" fill="#000"/><ellipse cx="244" cy="122" rx="17" ry="19" fill="#000"/>
+      <circle cx="178" cy="124" r="5" fill="#ff2424"/><circle cx="246" cy="124" r="5" fill="#ff2424"/>
+      <g fill="none" stroke="#d0141f" stroke-width="4"><path d="M146 175 m-14 0 a14 14 0 1 0 14 -14 a9 9 0 1 0 -9 9 a4 4 0 1 0 4 -4"/><path d="M274 175 m-14 0 a14 14 0 1 0 14 -14 a9 9 0 1 0 -9 9 a4 4 0 1 0 4 -4"/></g>
+      <ellipse cx="210" cy="168" rx="30" ry="22" fill="#f4b4b0" ${K}/>
+      <ellipse cx="199" cy="168" rx="5" ry="9" fill="#5a2a28"/><ellipse cx="221" cy="168" rx="5" ry="9" fill="#5a2a28"/>
+      <path d="M160 212 L170 240 M260 212 L250 240" stroke="#000" stroke-width="2.5"/>
+      <g id="jaw"><path d="M168 208 Q210 222 252 208 L246 238 Q210 250 174 238Z" fill="#ebe4d4" ${K}/><path d="M178 214 Q210 226 242 214" stroke="#a00d16" stroke-width="5" fill="none"/></g>`;
+    else if(s.tv==='jp') c=`
+      <rect width="420" height="320" fill="#6b6a3c"/>
+      <rect y="250" width="420" height="70" fill="#c9c49c" ${K}/>
+      <path d="M210 0 L80 320 L340 320Z" fill="#fff6c0" opacity=".12"/>
+      <g class="tremble">${jpFours()}</g>
+      <text x="40" y="70" font-family="'Comic Neue',cursive" font-weight="700" font-size="50" fill="#ff3b3b" stroke="#000" stroke-width="3" paint-order="stroke">!!</text>
+      <text x="14" y="300" font-family="monospace" font-size="14" fill="#ff3b3b" class="blink">● REC</text>`;
+    return svg(`
+      <rect width="800" height="450" fill="#a2a15e"/>
+      <polygon points="0,450 0,400 800,400 800,450" fill="#d8d3ae"/>
+      <line x1="0" y1="400" x2="800" y2="400" stroke="#000" stroke-width="3"/>
+      <g transform="translate(104,112) scale(.74)">
+      <path d="M330 22 L250 -110 M470 22 L560 -120" stroke="#000" stroke-width="6"/>
+      <rect x="95" y="22" width="610" height="410" rx="34" fill="#6b4a2c" ${K}/>
+      <path d="M110 60 Q400 50 690 64 M108 400 Q400 410 690 396" stroke="#4e351e" stroke-width="3" fill="none"/>
+      <rect x="135" y="55" width="440" height="340" rx="44" fill="#0a0a0a" ${K}/>
+      <clipPath id="cp"><rect x="145" y="65" width="420" height="320" rx="38"/></clipPath>
+      <g clip-path="url(#cp)"><g transform="translate(145,65)">${c}</g><rect x="145" y="65" width="420" height="320" fill="url(#scan)"/></g>
+      <circle cx="640" cy="110" r="22" fill="#2a1d12" ${K}/><path d="M640 92 V110" stroke="#e8d3a8" stroke-width="4"/>
+      <circle cx="640" cy="175" r="22" fill="#2a1d12" ${K}/><path d="M640 175 L654 165" stroke="#e8d3a8" stroke-width="4"/>
+      <g stroke="#000" stroke-width="4"><path d="M612 240H668M612 256H668M612 272H668M612 288H668M612 304H668M612 320H668"/></g>
+      <circle cx="640" cy="360" r="6" fill="${s.tv&&s.tv!=='off'?'#ff3030':'#400'}" ${K2}/></g>
+    `);
+  }
+};
+
+/* ================= GUION ================= */
+const S=[
+ {sc:'negro',txt:'Una noche cualquiera... 2:47 de la madrugada.',auto:2800},
+ {sc:'cuarto',snd:'tick',txt:'Juan Atencia, ingeniero mecánico, lleva 6 horas seguidas haciendo un plano en su cuarto.'},
+ {sc:'cuarto',who:'JUAN',txt:'Ya casi... solo le faltan las cotas a este engranaje y lo entrego.'},
+ {sc:'monitor',who:'JUAN',txt:'Tolerancia de 0.02 milímetros. Perfecto. Soy un genio.'},
+ {sc:'cuarto',fx:'flicker',snd:'clank',txt:'*¡CLANK!*'},
+ {sc:'cuarto',who:'JUAN',txt:'¿Juan Pablo? ¿Eres tú? Si es otra de tus bromas te juro que...'},
+ {sc:'cuarto',who:'JUAN',txt:'...Bah. Debe ser el gato del vecino. A seguir con el plano.'},
+ {sc:'cuarto',pig:1,snd:'heart',txt:'Detrás de él, la puerta se abre despacio...'},
+ {sc:'monitor',pig:1,snd:'sting',txt:'En el reflejo de la pantalla aparece algo...'},
+ {sc:'monitor',pig:1,who:'JUAN',txt:'...¿Qué es eso?'},
+ {sc:'grito',fx:'shake',snd:'scream'},
+ {sc:'negro',fx:'flash',snd:'thud',auto:1700},
+ {sc:'negro',snd:'drag',txt:'*arrastran algo pesado por el suelo*',auto:2600},
+ {sc:'negro',snd:'door',txt:'*una puerta de metal se cierra*',auto:2600},
+ {sc:'negro',snd:'laugh',txt:'*je... je je je...*',auto:2800},
+ {sc:'negro',txt:'Horas después...',auto:2200},
+ {sc:'sala',fx:'flicker',snd:'buzz',who:'JUAN',txt:'Mmmh... ¿dónde estoy? Me duele la cabeza...'},
+ {sc:'sala',scared:1,snd:'chain',who:'JUAN',txt:'¿¡UNA CADENA!? ¿¡Por qué tengo una cadena en el pie!?'},
+ {sc:'sala',scared:1,who:'JUAN',txt:'¡¿HOLAAA?! ¡¿ALGUIEN ME OYE?!'},
+ {sc:'sala',scared:1,tvon:1,snd:'static',txt:'De repente, la tele vieja se enciende sola.'},
+ {sc:'sala',scared:1,tvon:1,walk:1,snd:'chain',txt:'Juan se acerca a la tele, arrastrando la cadena...'},
+ {sc:'tv',tv:'static',snd:'static',auto:1300},
+ {sc:'tv',tv:'puppet',voice:1,who:'EL MARRANO',txt:'Hola, Juan. Quiero jugar a un juego.'},
+ {sc:'tv',tv:'puppet',voice:1,who:'EL MARRANO',txt:'Te pasas la vida haciendo planos perfectos... pero esto no lo planeaste, ¿verdad?'},
+ {sc:'tv',tv:'puppet',voice:1,who:'EL MARRANO',txt:'Esta noche no estás solo. Tengo a alguien que conoces muy bien...'},
+ {sc:'tv',tv:'jp',snd:'static',who:'JUAN PABLO',txt:'¡¡JUAAAN!! ¡¡AYÚDAME, PARCE!!'},
+ {sc:'tv',tv:'jp',who:'JUAN',b:[16,4],txt:'¡¿JUAN PABLO?!'},
+ {sc:'tv',tv:'jp',who:'JUAN PABLO',txt:'¡Me amarraron al piso en cuatro y hay un PALO DE ESCOBA acercándose por detrás!'},
+ {sc:'tv',tv:'puppet',voice:1,who:'EL MARRANO',txt:'Tu amigo está atado a mi máquina. Cada minuto, el palo avanza un poquito más...'},
+ {sc:'tv',tv:'puppet',voice:1,who:'EL MARRANO',txt:'Si no lo salvas pronto... el palo entrará por donde no le da el sol.'},
+ {sc:'tv',tv:'jp',snd:'scream',who:'JUAN PABLO',txt:'¡¡NOOO, POR AHÍ NOOO!! ¡¡JUAN, APÚRATE!!'},
+ {sc:'tv',tv:'puppet',voice:1,who:'EL MARRANO',txt:'La llave de tu cadena está más cerca de lo que crees. Usa esa cabecita de ingeniero.'},
+ {sc:'tv',tv:'puppet',voice:1,who:'EL MARRANO',txt:'Sálvalo... o quédate mirando. Pero él no se va a poder sentar en un buen tiempo. Tú eliges.'},
+ {sc:'tv',tv:'off',snd:'off',txt:'La tele se apaga.'},
+ {final:1}
+];
+/* dónde sale el globo de cada personaje en cada escena: [x%, y%] */
+const POS={cuarto:{JUAN:[61,3]},monitor:{JUAN:[50,4]},sala:{JUAN:[33,6]},tv:{'EL MARRANO':[50,2],'JUAN PABLO':[50,2],'JUAN':[16,4]}};
+
+/* ================= SONIDO ================= */
+let AC=null, master=null, muted=false, drone=null;
+function ac(){
+  if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=muted?0:1;master.connect(AC.destination)}
+  if(AC.state==='suspended')AC.resume();
+  return AC;
+}
+function tone(f,d,o={}){
+  const a=ac(),t=a.currentTime+(o.delay||0),os=a.createOscillator(),g=a.createGain();
+  os.type=o.type||'sine';os.frequency.setValueAtTime(f,t);
+  if(o.slide)os.frequency.exponentialRampToValueAtTime(o.slide,t+d);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(o.g??.2,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  os.connect(g).connect(master);os.start(t);os.stop(t+d+.05);
+}
+let NB=null;
+function noise(d,o={}){
+  const a=ac(),t=a.currentTime+(o.delay||0);
+  if(!NB){NB=a.createBuffer(1,a.sampleRate*2,a.sampleRate);const c=NB.getChannelData(0);for(let k=0;k<c.length;k++)c[k]=Math.random()*2-1}
+  const s=a.createBufferSource();s.buffer=NB;s.loop=true;
+  const f=a.createBiquadFilter();f.type=o.type||'lowpass';f.frequency.value=o.f||1000;f.Q.value=o.q||1;
+  const g=a.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(o.g??.3,t+(o.a||.01));g.gain.linearRampToValueAtTime(0,t+d);
+  s.connect(f).connect(g).connect(master);s.start(t);s.stop(t+d+.05);
+}
+const SFX={
+  tick(){for(let k=0;k<6;k++)tone(1100+Math.random()*500,.03,{type:'square',g:.02,delay:k*.12+Math.random()*.05})},
+  clank(){tone(330,.5,{type:'square',g:.12,slide:170});tone(523,.4,{type:'triangle',g:.12});noise(.2,{type:'highpass',f:2500,g:.35})},
+  thud(){tone(95,.6,{g:.7,slide:35});noise(.25,{f:300,g:.6})},
+  heart(){[0,.22,1,1.22,2,2.22].forEach(t=>tone(58,.2,{g:.7,slide:38,delay:t}))},
+  sting(){tone(233,1.6,{type:'sawtooth',g:.07});tone(247,1.6,{type:'sawtooth',g:.07});tone(466,1.6,{type:'sawtooth',g:.05});noise(1,{type:'highpass',f:3000,g:.08})},
+  scream(){noise(1.1,{type:'bandpass',f:1700,q:4,g:.45});tone(760,1.1,{type:'sawtooth',g:.07,slide:480})},
+  drag(){noise(2,{type:'bandpass',f:350,q:.7,g:.35,a:.3})},
+  door(){tone(130,.9,{type:'square',g:.1,slide:55});noise(.5,{f:500,g:.6});tone(70,.8,{g:.4,slide:40})},
+  laugh(){[0,.22,.44,.66,.88].forEach((t,k)=>tone(190-k*12,.16,{type:'sawtooth',g:.09,slide:140-k*10,delay:t}))},
+  buzz(){tone(60,1.6,{type:'sawtooth',g:.04});tone(120,1.6,{type:'square',g:.015})},
+  chain(){for(let k=0;k<7;k++){tone(1800+Math.random()*1800,.09,{type:'triangle',g:.08,delay:k*.08});noise(.05,{type:'highpass',f:4000,g:.15,delay:k*.08})}},
+  static(){noise(1.2,{type:'highpass',f:1400,g:.18})},
+  off(){tone(1500,.35,{g:.1,slide:60})},
+  type(){tone(1300+Math.random()*300,.02,{type:'square',g:.012})},
+  clock(){tone(1000,.05,{type:'square',g:.05})}
+};
+function startDrone(){
+  if(drone)return;const a=ac();drone=a.createGain();drone.gain.value=.035;
+  const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=220;
+  [55,58.3,82.4].forEach(fr=>{const o=a.createOscillator();o.type='sawtooth';o.frequency.value=fr;o.connect(f);o.start()});
+  f.connect(drone).connect(master);
+}
+function speak(t){
+  if(muted||!('speechSynthesis' in window))return;
+  try{
+    const u=new SpeechSynthesisUtterance(t.replace(/\.\.\./g,', '));
+    const v=speechSynthesis.getVoices().find(v=>/^es/i.test(v.lang));
+    if(v)u.voice=v;u.lang=v?v.lang:'es-ES';u.pitch=.1;u.rate=.82;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+if('speechSynthesis' in window){try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>{}}catch(e){}}
+
+/* ================= NIVEL 1 · PARTE 1 (la parte jugable: celda, pasillo, taller) ================= */
+const ITEMS={
+  sandwich:{n:'Sándwich mordido',icon:`<path d="M-14 8 L0 -12 L14 8Z" fill="#e8c27a" ${K2}/><path d="M-11 4 H11" stroke="#4caf50" stroke-width="4"/><path d="M-14 12 L0 -8 L14 12Z" fill="#e8c27a" ${K2}/><circle cx="8" cy="-2" r="4" fill="#111"/>`},
+  llave:{n:'Llave inglesa',icon:`<path d="M-13 13 L5 -5" stroke="#000" stroke-width="10" stroke-linecap="round"/><path d="M-13 13 L5 -5" stroke="#b8c2c8" stroke-width="5" stroke-linecap="round"/><path d="M1 -13 A10 10 0 1 0 14 0 L7 -1 L2 -6Z" fill="#b8c2c8" ${K2}/>`},
+  control:{n:'Control remoto',icon:`<rect x="-7" y="-15" width="14" height="30" rx="4" fill="#333" ${K2}/><circle cx="0" cy="-8" r="3" fill="#e01b1b"/><g fill="#999"><circle cx="-3" cy="0" r="2"/><circle cx="3" cy="0" r="2"/><circle cx="-3" cy="6" r="2"/><circle cx="3" cy="6" r="2"/></g>`},
+  destornillador:{n:'Destornillador',icon:`<rect x="-15" y="-5" width="13" height="10" rx="3" fill="#e01b1b" ${K2}/><path d="M-2 0 H14" stroke="#000" stroke-width="6" stroke-linecap="round"/><path d="M-2 0 H14" stroke="#c9ccd1" stroke-width="3" stroke-linecap="round"/>`},
+  pilas:{n:'Pilas',icon:`<rect x="-12" y="-11" width="10" height="24" rx="2" fill="#2f6db0" ${K2}/><rect x="2" y="-11" width="10" height="24" rx="2" fill="#2f6db0" ${K2}/><rect x="-9" y="-14" width="4" height="3" fill="#ccc"/><rect x="5" y="-14" width="4" height="3" fill="#ccc"/>`},
+  linterna:{n:'Linterna (sin pilas)',icon:`<rect x="-14" y="-5" width="18" height="10" rx="2" fill="#555" ${K2}/><path d="M4 -8 L14 -11 V11 L4 8Z" fill="#777" ${K2}/>`},
+  linternaOn:{n:'Linterna encendida',icon:`<path d="M14 -11 L28 -18 V18 L14 11Z" fill="#fff6a8" opacity=".8"/><rect x="-14" y="-5" width="18" height="10" rx="2" fill="#555" ${K2}/><path d="M4 -8 L14 -11 V11 L4 8Z" fill="#777" ${K2}/>`},
+  engranajeT:{n:'Engranaje torcido',icon:`<g transform="skewX(-25) scale(1,.75)"><circle r="12" fill="none" stroke="#000" stroke-width="7" stroke-dasharray="3 3"/><circle r="9" fill="#c9ccd1" ${K2}/><circle r="3" fill="#666"/></g>`},
+  engranaje:{n:'Engranaje',icon:`<circle r="12" fill="none" stroke="#000" stroke-width="7" stroke-dasharray="3 3"/><circle r="9" fill="#c9ccd1" ${K2}/><circle r="3" fill="#666"/>`},
+  rueda:{n:'Rueda (15 KG)',icon:`<circle r="14" fill="#222" ${K2}/><circle r="7" fill="#999" ${K2}/><circle r="2" fill="#333"/>`},
+  pesa:{n:'Pesa de 20 KG',icon:`<rect x="-15" y="-12" width="30" height="24" rx="5" fill="#444" ${K2}/><text y="5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="'Comic Neue',cursive">20</text>`},
+  fusible:{n:'Fusible',icon:`<rect x="-10" y="-6" width="20" height="12" rx="3" fill="#cfe8ff" fill-opacity=".7" ${K2}/><rect x="-15" y="-6" width="6" height="12" fill="#c9ccd1" ${K2}/><rect x="9" y="-6" width="6" height="12" fill="#c9ccd1" ${K2}/><path d="M-9 0 Q-3 -4 0 0 Q3 4 9 0" stroke="#e01b1b" stroke-width="1.5" fill="none"/>`},
+  palanca:{n:'Palanca (pata de cabra)',icon:`<path d="M-12 14 L10 -10 Q14 -15 9 -16" stroke="#000" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M-12 14 L10 -10 Q14 -15 9 -16" stroke="#c1121f" stroke-width="4" fill="none" stroke-linecap="round"/>`},
+  llavePaso:{n:'Llave de paso (manija)',icon:`<circle r="12" fill="none" stroke="#000" stroke-width="7"/><circle r="12" fill="none" stroke="#e01b1b" stroke-width="4"/><path d="M-12 0 H12 M0 -12 V12" stroke="#000" stroke-width="5"/><circle r="4" fill="#999" ${K2}/>`},
+  encendedor:{n:'Encendedor',icon:`<rect x="-7" y="-8" width="14" height="22" rx="3" fill="#e9b949" ${K2}/><rect x="-6" y="-14" width="12" height="7" fill="#999" ${K2}/><path d="M0 -16 Q-5 -24 0 -30 Q5 -24 0 -16Z" fill="#ff8a1e"/>`},
+  olla:{n:'Olla',icon:`<path d="M-14 -6 H14 V8 Q14 14 8 14 H-8 Q-14 14 -14 8Z" fill="#9aa3a8" ${K2}/><path d="M-18 -4 H-14 M14 -4 H18" stroke="#000" stroke-width="4"/>`},
+  bolsa:{n:'Bolsa de basura',icon:`<path d="M-12 -6 Q-16 14 0 15 Q16 14 12 -6 Z" fill="#222" ${K2}/><path d="M-5 -6 L-2 -14 L2 -14 L5 -6" fill="#222" ${K2}/>`},
+  hielo:{n:'Bloque de hielo (con una llave adentro)',icon:`<rect x="-14" y="-13" width="28" height="26" rx="4" fill="#bfe8ff" ${K2}/><path d="M-6 0 H8 M4 0 V5" stroke="#e9b949" stroke-width="3"/><circle cx="-8" cy="0" r="3" fill="none" stroke="#e9b949" stroke-width="2.5"/>`},
+  ollaHielo:{n:'Olla con el bloque de hielo',icon:`<path d="M-14 -6 H14 V8 Q14 14 8 14 H-8 Q-14 14 -14 8Z" fill="#9aa3a8" ${K2}/><rect x="-10" y="-16" width="20" height="14" rx="3" fill="#bfe8ff" ${K2}/>`},
+  llaveDorada:{n:'Llave dorada',icon:`<circle cx="-8" cy="0" r="7" fill="none" stroke="#000" stroke-width="8"/><circle cx="-8" cy="0" r="7" fill="none" stroke="#ffd34d" stroke-width="4"/><path d="M-1 0 H15 M9 0 V7 M14 0 V6" stroke="#000" stroke-width="8" stroke-linecap="round"/><path d="M-1 0 H15 M9 0 V7 M14 0 V6" stroke="#ffd34d" stroke-width="4" stroke-linecap="round"/>`},
+  cinta:{n:'Cinta VHS "PARA JUAN"',icon:`<rect x="-16" y="-10" width="32" height="20" rx="2" fill="#222" ${K2}/><circle cx="-7" cy="0" r="4" fill="#fff"/><circle cx="7" cy="0" r="4" fill="#fff"/><rect x="-10" y="-8" width="20" height="5" fill="#ffe25e"/>`},
+  correa:{n:'Correa del ventilador',icon:`<ellipse rx="14" ry="9" fill="none" stroke="#000" stroke-width="7"/><ellipse rx="14" ry="9" fill="none" stroke="#3a3a3a" stroke-width="4"/>`}
+};
+const RECIPES=[
+  {a:'control',b:'destornillador',out:'pilas',gone:['control'],say:'Abro el control con el destornillador... ¡pilas!'},
+  {a:'linterna',b:'pilas',out:'linternaOn',gone:['linterna','pilas'],say:'¡Linterna funcionando! Hágase la luz.'},
+  {a:'olla',b:'hielo',out:'ollaHielo',gone:['olla','hielo'],say:'Meto el bloque de hielo en la olla. Ahora solo falta calentarlo.'}
+];
+const RING={x:120,y:310}, CHAIN_MAX=250, GEAR_GOAL=[0,2,6], GAME_TIME=900, SAVE_KEY='marrano-save-1';
+let mode='intro', G=null, gRaf=null, gTick=null, sayT=null, sayTyper=null;
+const H=id=>`data-hs="${id}" style="cursor:pointer"`;
+
+/* ---------- habitaciones ---------- */
+function shell(c){
+  return `<polygon points="0,0 800,0 650,40 150,40" fill="${c[0]}" ${K}/>
+   <polygon points="0,0 150,40 150,290 0,380" fill="${c[1]}" ${K}/>
+   <polygon points="800,0 650,40 650,290 800,380" fill="${c[1]}" ${K}/>
+   <rect x="150" y="40" width="500" height="250" fill="${c[2]}" ${K}/>
+   <polygon points="0,380 150,290 650,290 800,380" fill="${c[3]}" ${K}/>`;
+}
+/* muñeco del Marrano (baño); se acerca cada vez que Juan hace algo */
+function doll(covered){
+  if(covered)return `<path d="M-20 0 Q-24 -62 0 -68 Q24 -62 20 0Z" fill="#222" ${K}/><path d="M-6 -68 L0 -78 L6 -68" fill="#222" ${K2}/><path d="M-14 -30 Q0 -26 14 -30" stroke="#444" stroke-width="2" fill="none"/>`;
+  return `<rect x="-12" y="-34" width="24" height="34" rx="5" fill="#1c1c1c" ${K}/><path d="M-6 -34 L0 -28 L6 -34Z" fill="#c1121f"/>
+   <path d="M-14 -62 L-19 -74 L-7 -67Z M14 -62 L19 -74 L7 -67Z" fill="#e08f8f" ${K2}/>
+   <circle cy="-48" r="17" fill="#f6f1e4" ${K}/><path d="M-16 -54 Q-14 -66 0 -66 Q14 -66 16 -54 Q8 -60 0 -60 Q-8 -60 -16 -54Z" fill="#111"/>
+   <circle cx="-6" cy="-51" r="3.5" fill="#000"/><circle cx="6" cy="-51" r="3.5" fill="#000"/><circle cx="-5.5" cy="-51.5" r="1.2" fill="#f22"/><circle cx="6.5" cy="-51.5" r="1.2" fill="#f22"/>
+   <ellipse cy="-43" rx="6" ry="4.5" fill="#f4b4b0" ${K2}/><circle cx="-11" cy="-42" r="2.5" fill="none" stroke="#c1121f" stroke-width="1.5"/><circle cx="11" cy="-42" r="2.5" fill="none" stroke="#c1121f" stroke-width="1.5"/>
+   <path d="M-6 -36 H6" stroke="#7a0b12" stroke-width="2"/>`;
+}
+function dollPos(){
+  const st=Math.min(3,(G&&G.f.dollStep)||0);
+  return [[600,290],[540,322],[470,342],[Math.max(200,Math.min(700,(G?G.x:400)+80)),366]][st];
+}
+/* puzle de luces del panel de energía (calderas) */
+const LO_START=(()=>{const s=Array(9).fill(true);[0,4,5,7].forEach(i=>loPress(s,i));return s})();
+function loPress(s,i){const r=i/3|0,c=i%3;[[r,c],[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([a,b])=>{if(a>=0&&a<3&&b>=0&&b<3)s[a*3+b]=!s[a*3+b]})}
+function lightsMini(){
+  const s=(G&&G.f.lo)||LO_START;
+  return s.map((on,i)=>`<rect x="${551+(i%3)*19}" y="${132+(i/3|0)*19}" width="14" height="14" rx="2" fill="${on?'#4dd84d':'#e01b1b'}" ${K2}/>`).join('');
+}
+function rat(sleep){
+  return `<g>
+   <path d="M60 10 Q110 0 120 -30 Q126 -48 112 -50" stroke="#000" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M60 10 Q110 0 120 -30 Q126 -48 112 -50" stroke="#d9a3a3" stroke-width="4" fill="none" stroke-linecap="round"/>
+   <ellipse cx="20" cy="-6" rx="56" ry="34" fill="#6d6d6d" ${K}/>
+   <ellipse cx="-34" cy="-20" rx="30" ry="24" fill="#7a7a7a" ${K}/>
+   <circle cx="-30" cy="-46" r="13" fill="#d9a3a3" ${K}/><circle cx="-10" cy="-42" r="12" fill="#d9a3a3" ${K}/>
+   <path d="M-56 -22 L-74 -14 L-56 -8Z" fill="#7a7a7a" ${K2}/><circle cx="-74" cy="-14" r="4" fill="#e88"/>
+   ${sleep?`<path d="M-46 -26 Q-40 -22 -34 -26" stroke="#000" stroke-width="3" fill="none"/><text x="-10" y="-70" font-family="'Comic Neue',cursive" font-weight="700" font-size="22" fill="#fff" stroke="#000" stroke-width="3" paint-order="stroke">Zzz</text>`
+          :`<circle cx="-42" cy="-26" r="6" fill="#ff2a2a" ${K2}/><path d="M-60 -6 L-52 4 L-48 -4 L-44 4" fill="#fff" ${K2}/>`}
+   <path d="M-66 -18 L-90 -24 M-66 -14 L-92 -12 M-66 -10 L-88 -2" stroke="#000" stroke-width="1.5"/>
+   <path d="M-10 26 V34 M30 26 V34 M50 22 V32" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+  </g>`;
+}
+const ROOMS={
+  celda:{name:'La celda',dark:null,
+    draw:f=>`${shell(['#5f5e35','#83824a','#a2a15e','#d8d3ae'])}
+     <path d="M232 64 L252 96 L240 132 M252 96 L278 104 M566 196 L586 228 L574 262 M60 120 L82 152 L70 194 M700 70 L718 104 L706 140" stroke="#000" stroke-width="2" fill="none"/>
+     <g stroke="#3a3a20" stroke-width="2.5"><path d="M690 230V262M698 232V264M706 234V266M714 236V268M686 242L720 256"/><path d="M732 240V272M740 242V274"/></g>
+     <g fill="#7d7d73" stroke="#000" stroke-width="2"><rect x="520" y="58" width="30" height="12"/><rect x="552" y="58" width="30" height="12"/><rect x="536" y="72" width="30" height="12"/><rect x="180" y="200" width="28" height="11"/><rect x="196" y="213" width="28" height="11"/></g>
+     <g ${H('reja')}>
+       <path d="M352 290 V196 Q400 140 448 196 V290Z" fill="#111" ${K}/>
+       ${f.reja?`<path d="M372 290 L400 200 L428 290Z" fill="#fff6c0" opacity=".2"/>`:`<path d="M368 290V176M384 290V160M400 290V155M416 290V160M432 290V176" stroke="#8a8a8a" stroke-width="5"/>`}
+     </g>
+     <g ${H('teclado')}><rect x="458" y="206" width="30" height="40" rx="4" fill="#333" ${K}/><rect x="463" y="211" width="20" height="8" fill="${f.reja?'#4dd84d':'#5a1010'}"/>
+       <g fill="#999">${[0,1,2].map(r=>[0,1,2].map(c=>`<rect x="${464+c*7}" y="${223+r*7}" width="5" height="5"/>`).join('')).join('')}</g></g>
+     <path d="M40 352 L40 236 Q70 168 104 214 L104 318Z" fill="#111" ${K} ${H('arco')}/>
+     <g ${H('colchon')}><path d="M160 302 L262 296 L276 322 L170 330Z" fill="#cfc8a2" ${K}/><ellipse cx="214" cy="314" rx="22" ry="6" fill="#9a8f5a" opacity=".6"/>
+       ${f.colchon?'':`<path d="M246 318 L262 306 L270 320Z" fill="#e8c27a" ${K2}/>`}</g>
+     <g ${H('baldosa')}><rect x="282" y="326" width="90" height="28" fill="transparent"/>
+       <polygon points="300,334 364,334 356,346 290,346" fill="${f.baldosa?'#2a281e':'#8d8a76'}" stroke="#000" stroke-width="2"/>
+       ${f.baldosa?'':`<path d="M300 333 L364 333" stroke="#fff" stroke-width="1.5" opacity=".5"/>`}</g>
+     <g fill="#8d8a76" stroke="#000" stroke-width="2"><polygon points="430,312 484,312 482,322 426,322"/><polygon points="560,350 628,350 640,364 566,364"/></g>
+     <ellipse cx="430" cy="356" rx="54" ry="10" fill="#8a1c1c" opacity=".5" ${H('charco')}/>
+     <path d="M400 40V78" stroke="#000" stroke-width="3"/>
+     <g class="flk" pointer-events="none"><circle cx="400" cy="92" r="240" fill="url(#bulbg)"/><circle cx="400" cy="90" r="11" fill="#fff6a8" ${K}/></g>
+     <g ${H('caja')}><rect x="508" y="292" width="92" height="40" fill="#a0703c" ${K}/><path d="M508 312H600M538 292V332M570 292V332" stroke="#000" stroke-width="2"/>
+       ${f.control?'':`<rect x="590" y="282" width="10" height="16" rx="3" fill="#333" ${K2}/>`}</g>
+     <g ${H('tv')}><path d="M532 224 L514 192 M572 224 L592 190" stroke="#000" stroke-width="3"/>
+       <rect x="500" y="222" width="108" height="72" rx="10" fill="#5a3d24" ${K}/>
+       <rect x="510" y="232" width="72" height="52" rx="8" fill="${G&&G.tvon?'#ccc':'#1a1a1a'}" ${G&&G.tvon?'filter="url(#nz)"':''}/><rect x="510" y="232" width="72" height="52" rx="8" fill="none" ${K2}/>
+       <circle cx="595" cy="244" r="4" fill="#222"/><circle cx="595" cy="262" r="4" fill="#222"/>
+       ${f.tvAbierta?`<rect x="590" y="270" width="14" height="10" fill="#111"/>`:''}</g>`,
+    exits:f=>f.reja?`<g ${H('go:pasillo')}><rect x="356" y="200" width="88" height="90" fill="transparent"/>${arrow(400,312,-90,.9)}</g>`:''},
+
+  pasillo:{name:'El pasillo',dark:[620,60],
+    draw:f=>`${shell(['#40444d','#5d6370','#727987','#b4b1a3'])}
+     <path d="M150 58 H650 M150 70 H650" stroke="#2b2f36" stroke-width="7"/><path d="M150 58 H650 M150 70 H650" stroke="#8a8f99" stroke-width="3"/>
+     <g ${H('bano')}><rect x="232" y="148" width="86" height="142" fill="#3f6b4f" ${K}/><rect x="244" y="160" width="62" height="50" fill="none" ${K2}/>
+       <circle cx="306" cy="226" r="5" fill="#e9b949" ${K2}/><rect x="256" y="120" width="38" height="20" rx="3" fill="#fff" ${K2}/><text x="275" y="135" text-anchor="middle" font-size="13" font-weight="700" font-family="'Comic Neue',cursive">WC</text>
+       ${f.tablas?`<rect x="244" y="160" width="62" height="130" fill="#0d1a12"/>`:`<path d="M236 200 L314 250 M314 200 L236 250" stroke="#7a5a2a" stroke-width="7"/>`}</g>
+     <g ${H('plano')}><rect x="356" y="96" width="98" height="66" fill="#1d5fa0" ${K}/><g fill="none" stroke="#fff" stroke-width="2.5">
+       <circle cx="382" cy="130" r="13" stroke-dasharray="4 3"/><circle cx="408" cy="130" r="13" stroke-dasharray="4 3"/><circle cx="436" cy="130" r="11" stroke-dasharray="4 3"/></g>
+       <text x="405" y="156" text-anchor="middle" font-size="9" fill="#fff" font-family="monospace">CAJA HERRAM.</text></g>
+     <g ${H('ventilador')}><circle cx="548" cy="122" r="34" fill="#555" ${K}/><circle cx="548" cy="122" r="27" fill="#222" ${K2}/>
+       <g class="${f.power&&!f.ventilador?'spin':''}"><path d="M548 122 L548 98 Q560 104 552 122Z M548 122 L572 122 Q566 134 548 126Z M548 122 L548 146 Q536 140 544 122Z M548 122 L524 122 Q530 110 548 118Z" fill="#9aa"/></g>
+       <circle cx="548" cy="122" r="5" fill="#333"/>${f.ventilador?'':`<path d="M556 140 Q590 150 590 176" stroke="#111" stroke-width="5" fill="none"/>`}
+       ${[[520,94],[576,94],[520,150],[576,150]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#ccc" ${K2}/>`).join('')}</g>
+     ${f.rueda?'':`<g ${H('rueda')}><ellipse cx="74" cy="318" rx="20" ry="34" fill="#222" ${K}/><ellipse cx="74" cy="318" rx="9" ry="16" fill="#999" ${K2}/><text x="74" y="366" text-anchor="middle" font-size="11" font-weight="700" font-family="'Comic Neue',cursive">15 KG</text></g>`}
+     <g ${H('taller')}><path d="M690 306 L690 130 Q726 112 762 124 L762 342Z" fill="${f.power?'#6a5a40':'#3a2f22'}" ${K}/>
+       <rect x="700" y="100" width="54" height="18" rx="3" fill="#e9b949" ${K2}/><text x="727" y="114" text-anchor="middle" font-size="11" font-weight="700" font-family="'Comic Neue',cursive">TALLER</text></g>
+     <g ${H('compuerta')}><polygon points="300,306 420,306 426,326 292,326" fill="${f.compuerta?'#050505':'#7d838c'}" ${K}/>
+       ${f.compuerta?`<path d="M320 312 H400 M316 318 H404" stroke="#333" stroke-width="2"/>`:`<path d="M304 310 L316 322 M324 310 L336 322 M344 310 L356 322 M364 310 L376 322 M384 310 L396 322 M404 310 L414 322" stroke="#e9b949" stroke-width="4"/>`}</g>
+     <g ${H('placa')}><polygon points="452,330 560,330 568,352 446,352" fill="#9c9c9c" ${K}/>
+       <text x="507" y="347" text-anchor="middle" font-size="13" font-weight="700" font-family="'Comic Neue',cursive" fill="${plateKg(f)>=35?'#1a7a1a':'#c1121f'}">${plateKg(f)} / 35 KG</text>
+       ${f.pRueda?`<ellipse cx="474" cy="334" rx="16" ry="9" fill="#222" ${K2}/>`:''}${f.pPesa?`<rect x="526" y="322" width="28" height="16" rx="4" fill="#444" ${K2}/>`:''}</g>
+     ${f.rata?`<g transform="translate(724,374) scale(.6)" ${H('rata')}>${rat(true)}</g>`:''}
+     ${f.power?`<path d="M400 40V70" stroke="#000" stroke-width="3"/><circle cx="400" cy="80" r="11" fill="#fff6a8" ${K}/><circle cx="400" cy="80" r="200" fill="url(#bulbg)" pointer-events="none"/>`
+              :`<circle cx="620" cy="60" r="9" fill="#ff2a2a" ${K} class="flk"/>`}`,
+    exits:f=>`<g ${H('go:celda')}>${arrow(400,348,90,.8)}</g><g ${H('go:taller')}>${arrow(700,350,0,.8)}</g>${f.tablas?`<g ${H('go:bano')}>${arrow(275,300,-90,.7)}</g>`:''}${f.compuerta?`<g ${H('go:calderas')}>${arrow(360,300,90,.7)}</g>`:''}`},
+
+  taller:{name:'El taller',dark:[400,60],
+    draw:f=>`${shell(['#4f3d2f','#73593f','#8e7253','#c8b598'])}
+     <rect x="370" y="60" width="130" height="80" fill="#c9a26b" ${K}/>
+     <g fill="#333" stroke="#000" stroke-width="2"><path d="M392 74 L400 120 M384 76 H400"/><rect x="420" y="74" width="8" height="40"/><circle cx="470" cy="90" r="12" fill="none" stroke-width="6"/></g>
+     <g ${H('generador')}><rect x="168" y="186" width="160" height="104" rx="8" fill="#5f7a5a" ${K}/>
+       <rect x="182" y="200" width="44" height="30" rx="4" fill="#222" ${K2}/>${f.gFusible?`<g transform="translate(204,215) scale(.9)">${ITEMS.fusible.icon}</g>`:`<text x="204" y="220" text-anchor="middle" font-size="18" fill="#e01b1b">?</text>`}
+       <circle cx="262" cy="216" r="18" fill="#333" ${K2}/>${f.gEngranaje?`<g transform="translate(262,216) scale(1.2)" class="${f.power?'spin':''}">${ITEMS.engranaje.icon}</g>`:`<text x="262" y="222" text-anchor="middle" font-size="18" fill="#e01b1b">?</text>`}
+       <circle cx="306" cy="252" r="12" fill="#333" ${K2}/><circle cx="262" cy="216" r="4" fill="#999"/>
+       ${f.gCorrea?`<path d="M262 198 L306 240 M262 234 L298 262" stroke="#111" stroke-width="5"/>`:''}
+       <rect x="182" y="244" width="70" height="30" rx="4" fill="#222" ${K2}/><circle cx="198" cy="259" r="6" fill="${f.power?'#4dd84d':'#5a1010'}" ${K2}/><text x="232" y="264" text-anchor="middle" font-size="11" fill="#fff" font-family="monospace">${f.power?'ON':'OFF'}</text></g>
+     <g ${H('cables')}><path d="M762 160 Q730 190 744 220 Q756 248 724 268" stroke="#000" stroke-width="9" fill="none"/><path d="M762 160 Q730 190 744 220 Q756 248 724 268" stroke="#e01b1b" stroke-width="5" fill="none"/>
+       <path d="M724 268 l-10 -6 m10 6 l-12 4 m12 -4 l-4 12" stroke="#e9b949" stroke-width="3" class="blink"/></g>
+     <g><rect x="446" y="244" width="200" height="12" fill="#8a5a34" ${K}/><rect x="454" y="256" width="10" height="44" fill="#5a3a20" ${K2}/><rect x="628" y="256" width="10" height="44" fill="#5a3a20" ${K2}/>
+       <g ${H('cajon')}><rect x="540" y="256" width="60" height="18" fill="#9a6a40" ${K2}/><rect x="562" y="262" width="16" height="4" fill="#e9b949"/></g>
+       <g ${H('bajo')}><rect x="466" y="276" width="160" height="22" fill="#1a120a"/>${f.bajo?'':`<circle cx="520" cy="290" r="2" fill="#fff" opacity=".5"/>`}</g>
+       <g ${H('prensa')}><rect x="452" y="222" width="34" height="22" fill="#3d5a8a" ${K2}/><rect x="444" y="214" width="50" height="10" fill="#3d5a8a" ${K2}/><path d="M486 230 H506" stroke="#000" stroke-width="5"/><circle cx="508" cy="230" r="5" fill="#ccc" ${K2}/></g>
+       <g ${H('caja')}><rect x="560" y="216" width="70" height="28" rx="4" fill="${f.caja?'#7a1010':'#c1121f'}" ${K}/><path d="M580 216 V208 H610 V216" fill="none" stroke="#000" stroke-width="4"/>
+         ${f.caja?'':`<circle cx="595" cy="230" r="8" fill="#c9ccd1" stroke="#000" stroke-width="3" stroke-dasharray="3 2"/>`}</g></g>
+     ${f.pesa?'':`<g ${H('pesa')}><rect x="160" y="330" width="56" height="34" rx="8" fill="#444" ${K}/><text x="188" y="353" text-anchor="middle" font-size="15" font-weight="700" fill="#fff" font-family="'Comic Neue',cursive">20 KG</text></g>`}
+     ${f.power?`<path d="M400 40V54" stroke="#000" stroke-width="3"/><rect x="340" y="50" width="120" height="8" fill="#fff6a8" ${K2}/><circle cx="400" cy="60" r="220" fill="url(#bulbg)" pointer-events="none"/>`:''}`,
+    exits:f=>`<g ${H('go:pasillo')}>${arrow(400,348,90,.8)}</g>`},
+
+  bano:{name:'El baño',dark:null,
+    draw:f=>{const ds=dollPos();
+     return `${shell(['#4a5551','#8fa39b','#aebfb8','#d6d3c4'])}
+     <rect x="150" y="40" width="500" height="250" fill="url(#tiles)" opacity=".6"/>
+     <g stroke="#000" stroke-width="2" fill="none" opacity=".6"><path d="M200 80 L220 110 L212 140 M600 120 L620 150"/></g>
+     <g ${H('tanque')}><rect x="190" y="196" width="64" height="44" rx="5" fill="#ecebe2" ${K}/>${f.tanque?`<rect x="190" y="184" width="64" height="9" rx="3" fill="#f6f5ee" ${K2} transform="rotate(-14 222 188)"/>`:`<rect x="186" y="190" width="72" height="9" rx="3" fill="#f6f5ee" ${K2}/>`}
+       <path d="M196 244 Q222 236 248 244 L242 290 Q222 300 202 290Z" fill="#f6f5ee" ${K}/><ellipse cx="222" cy="246" rx="24" ry="6" fill="#cfcdbf" ${K2}/></g>
+     <g ${H('espejo')}><rect x="350" y="96" width="100" height="84" rx="6" fill="${f.espejo?'#e6eef0':'#9fb4bc'}" ${K}/>
+       ${f.espejo?`<text x="400" y="148" text-anchor="middle" font-family="'Comic Neue',cursive" font-weight="700" font-size="30" fill="#7a8a90" opacity=".85">4 8 1 5</text>`:`<path d="M362 108 L380 126 M410 104 L436 130" stroke="#fff" stroke-width="3" opacity=".6"/>`}</g>
+     <g ${H('lavabo')}><path d="M362 196 H438 L430 226 Q400 236 370 226Z" fill="#f6f5ee" ${K}/><rect x="392" y="226" width="16" height="64" fill="#ecebe2" ${K2}/>
+       <path d="M400 196 V184 H410" stroke="#999" stroke-width="5" fill="none"/><circle cx="384" cy="190" r="5" fill="#e01b1b" ${K2}/><circle cx="416" cy="190" r="5" fill="#2f6db0" ${K2}/>
+       ${f.espejo?`<g opacity=".5"><path d="M380 180 Q370 160 384 140 M410 182 Q424 160 412 136" stroke="#fff" stroke-width="6" fill="none"/></g>`:''}</g>
+     <g ${H('banera')}><path d="M520 240 H648 V290 H520Z" fill="#f6f5ee" ${K}/><path d="M520 120 H648" stroke="#999" stroke-width="4"/>
+       <path d="M524 122 Q540 180 528 236 L560 236 Q572 180 556 122Z M590 122 Q606 180 594 236 L640 236 Q650 180 640 122Z" fill="#7fb3c9" opacity=".85" ${K2}/></g>
+     <g transform="translate(${ds[0]},${ds[1]})" ${H('muneco')}><rect x="-26" y="-80" width="52" height="82" fill="transparent"/>${doll(f.munecoTapado)}</g>`},
+    exits:f=>`<g ${H('go:pasillo')}>${arrow(400,348,90,.8)}</g>`},
+
+  calderas:{name:'Las calderas',dark:null,pitch:true,
+    draw:f=>`${shell(['#24170f','#3e271c','#4f3326','#5e4c3c'])}
+     <g fill="#5a3a2a" stroke="#000" stroke-width="1.5">${[0,1,2,3,4,5].map(i=>`<rect x="${170+i*80}" y="${200+(i%2)*30}" width="34" height="14"/>`).join('')}</g>
+     <path d="M150 70 H650 M150 84 H650" stroke="#000" stroke-width="9"/><path d="M150 70 H650 M150 84 H650" stroke="#8a5a3a" stroke-width="5"/>
+     <g ${H('escalera')}><path d="M190 290 L200 40 M240 290 L230 40" stroke="#000" stroke-width="7"/><path d="M190 290 L200 40 M240 290 L230 40" stroke="#888" stroke-width="3"/>
+       ${[70,110,150,190,230,270].map(y=>`<path d="M${193+(290-y)*.03} ${y} H${237-(290-y)*.03}" stroke="#888" stroke-width="5"/>`).join('')}</g>
+     ${f.palanca?'':`<g ${H('palanca')}><rect x="252" y="140" width="40" height="140" fill="transparent"/><path d="M262 150 L278 262 Q280 272 270 274" stroke="#000" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M262 150 L278 262 Q280 272 270 274" stroke="#c1121f" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="262" cy="146" r="4" fill="#999"/></g>`}
+     <g ${H('caldera')}><rect x="310" y="120" width="150" height="170" rx="40" fill="#7a2a1a" ${K}/>
+       <circle cx="385" cy="160" r="22" fill="#eee" ${K}/><path d="M385 160 L${f.caldera?'398 146':'372 170'}" stroke="#c1121f" stroke-width="3"/>
+       <rect x="355" y="220" width="60" height="36" rx="6" fill="#111" ${K2}/>${f.caldera?`<path d="M370 252 Q376 232 385 248 Q392 228 400 252Z" fill="#3aa0ff"/>`:''}
+       <circle cx="445" cy="200" r="13" fill="#555" ${K2}/>${f.valvula?`<g transform="translate(445,200)">${ITEMS.llavePaso.icon}</g>`:''}
+       <path d="M460 150 H500 V60" stroke="#000" stroke-width="12" fill="none"/><path d="M460 150 H500 V60" stroke="#9a6a4a" stroke-width="7" fill="none"/></g>
+     <g ${H('disyuntores')}><rect x="540" y="120" width="76" height="96" rx="4" fill="#666" ${K}/>${lightsMini()}<text x="578" y="210" text-anchor="middle" font-size="10" fill="#eee" font-family="monospace">ENERGÍA</text></g>
+     <path d="M40 352 L40 236 Q70 168 104 214 L104 318Z" fill="#120a06" ${K}/>
+     <path d="M712 320 L712 140 Q740 128 770 138 L770 350Z" fill="${f.breaker?'#3a4a63':'#2a2a2a'}" ${K}/><circle cx="742" cy="170" r="6" fill="${f.breaker?'#4dd84d':'#e01b1b'}" ${K2}/>
+     <polygon points="330,334 470,334 478,370 322,370" fill="#4a3424" ${K2}/>${[0,1,2,3].map(i=>`<path d="M${340+i*36} 336 L${336+i*38} 368" stroke="#000" stroke-width="2"/>`).join('')}
+     <path d="M380 344 l10 8 l-6 10 M430 340 l8 12 M360 350 l-8 10" stroke="#000" stroke-width="2"/>`,
+    exits:f=>`<g ${H('go:pasillo')}>${arrow(215,300,-90,.7)}</g><g ${H('go:cocina')}>${arrow(84,340,180,.8)}</g><g ${H('go:vigilancia')}>${arrow(724,354,0,.8)}</g>`},
+
+  cocina:{name:'La cocina',dark:null,
+    draw:f=>`${shell(['#5a4122','#a07a45','#c49a5c','#e8e0cc'])}
+     <g fill="#cfc4a8">${[0,1,2,3,4,5,6].map(i=>`<polygon points="${170+i*70},300 ${205+i*70},300 ${200+i*72},322 ${162+i*72},322"/>`).join('')}</g>
+     <g ${H('estufa')}><rect x="180" y="200" width="110" height="90" fill="#ddd" ${K}/><rect x="180" y="192" width="110" height="10" fill="#333" ${K2}/>
+       <circle cx="208" cy="197" r="9" fill="#555"/><circle cx="262" cy="197" r="9" fill="#555"/>${f.estufa?`<path d="M200 194 Q208 182 216 194 M254 194 Q262 182 270 194" stroke="#3aa0ff" stroke-width="4" fill="none"/>`:''}
+       <rect x="196" y="222" width="78" height="52" rx="4" fill="#333" ${K2}/>
+       ${f.ollaEnEstufa?`<path d="M240 168 H284 V186 Q284 192 278 192 H246 Q240 192 240 186Z" fill="#9aa3a8" ${K2}/><path d="M252 166 Q256 150 250 140 M270 166 Q274 150 268 140" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/>`:''}</g>
+     <rect x="300" y="226" width="200" height="64" fill="#8a5a34" ${K}/><rect x="296" y="218" width="208" height="10" fill="#d9d2c0" ${K2}/>
+     <g ${H('cajonCocina')}><rect x="312" y="236" width="80" height="20" fill="#9a6a40" ${K2}/><rect x="344" y="243" width="16" height="4" fill="#e9b949"/></g>
+     <g ${H('fregadero')}><rect x="410" y="236" width="80" height="46" fill="#9a6a40" ${K2}/><circle cx="480" cy="259" r="3" fill="#e9b949"/><path d="M440 218 V200 H456" stroke="#999" stroke-width="5" fill="none"/></g>
+     <g ${H('alacena')}><rect x="300" y="90" width="200" height="70" fill="#a8743f" ${K}/><path d="M400 90 V160" stroke="#000" stroke-width="2"/><circle cx="392" cy="125" r="4" fill="#e9b949"/><circle cx="408" cy="125" r="4" fill="#e9b949"/></g>
+     <g ${H('nevera')}><rect x="530" y="110" width="90" height="180" rx="8" fill="#f0f0ea" ${K}/><path d="M530 170 H620" stroke="#000" stroke-width="2"/><rect x="606" y="128" width="6" height="30" rx="3" fill="#999"/><rect x="606" y="182" width="6" height="40" rx="3" fill="#999"/>
+       <g transform="rotate(4 570 207)"><rect x="548" y="190" width="44" height="34" fill="#fff" ${K2}/><text x="570" y="211" text-anchor="middle" font-size="8" font-weight="700" font-family="'Comic Neue',cursive">¡NO TOCAR!</text></g></g>
+     <g ${H('congeladorPuerta')}><path d="M690 306 L690 130 Q726 112 762 124 L762 342Z" fill="#cfe6f0" ${K}/><rect x="700" y="220" width="10" height="40" rx="4" fill="#9aa" ${K2}/>
+       ${f.congelador?'':`<path d="M694 200 l12 8 l-6 10 M700 280 l14 4 M698 236 l14 -4" stroke="#fff" stroke-width="4"/>`}<text x="726" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#2a6a8a" font-family="'Comic Neue',cursive">FRÍO</text></g>`,
+    exits:f=>`<g ${H('go:calderas')}>${arrow(400,348,90,.8)}</g>${f.congelador?`<g ${H('go:congelador')}>${arrow(706,354,0,.8)}</g>`:''}`},
+
+  congelador:{name:'El congelador',dark:null,
+    draw:f=>`${shell(['#7fb0c8','#a9d2e3','#c6e6f2','#e4f3f9'])}
+     <g stroke="#fff" stroke-width="3" opacity=".8"><path d="M160 60 l10 14 M210 50 l6 16 M600 56 l-8 14 M640 70 l-10 10 M30 120 l14 6 M760 140 l-12 8"/></g>
+     <path d="M150 60 H650" stroke="#555" stroke-width="5"/>
+     ${[250,340,470,560].map(x=>`<g ${H('carne')}><path d="M${x} 60 V86" stroke="#555" stroke-width="3"/><path d="M${x-6} 86 Q${x} 80 ${x+6} 86" stroke="#555" stroke-width="3" fill="none"/><path d="M${x-26} 96 Q${x} 84 ${x+26} 96 Q${x+32} 160 ${x} 180 Q${x-32} 160 ${x-26} 96Z" fill="#e3a0a0" ${K}/><path d="M${x-12} 120 Q${x} 128 ${x+12} 120" stroke="#fff" stroke-width="5" fill="none"/></g>`).join('')}
+     ${f.hielo?'':`<g ${H('hielo')}><rect x="380" y="250" width="70" height="56" rx="6" fill="#bfe8ff" ${K}/><path d="M402 278 H428 M420 278 V286" stroke="#e9b949" stroke-width="4"/><circle cx="398" cy="278" r="5" fill="none" stroke="#e9b949" stroke-width="3"/><path d="M386 258 l14 0" stroke="#fff" stroke-width="4"/></g>`}
+     <g ${H('cajas')}><rect x="180" y="250" width="80" height="50" fill="#9fb8c4" ${K}/><rect x="200" y="214" width="60" height="38" fill="#b7ccd6" ${K}/><text x="220" y="282" text-anchor="middle" font-size="11" font-weight="700" font-family="'Comic Neue',cursive">MORTADELA</text></g>`,
+    exits:f=>`<g ${H('go:cocina')}>${arrow(84,340,180,.8)}</g>`},
+
+  vigilancia:{name:'Sala de vigilancia',dark:null,
+    draw:f=>`${shell(['#151a24','#232b3a','#2e3a4f','#3a4252'])}
+     <g ${H('monitores')}>${[0,1,2,3,4,5].map(i=>{const x=208+(i%3)*130,y=60+(i/3|0)*86;
+       return `<rect x="${x}" y="${y}" width="118" height="78" rx="6" fill="#111" ${K}/>`+(i===4
+         ?`<svg x="${x+8}" y="${y+8}" width="102" height="62" viewBox="40 90 440 200"><rect x="40" y="90" width="440" height="200" fill="#6b6a3c"/>${jpFours()}</svg>`
+         :`<rect x="${x+8}" y="${y+8}" width="102" height="62" fill="#bbb" filter="url(#nz)"/>`)}).join('')}</g>
+     <g ${H('pc')}><rect x="330" y="252" width="140" height="12" fill="#555" ${K}/><rect x="370" y="210" width="60" height="42" rx="4" fill="#222" ${K2}/><rect x="375" y="215" width="50" height="32" fill="${f.pc?'#1a4a1a':'#0a2a4a'}"/><text x="400" y="236" text-anchor="middle" font-size="10" fill="#4dd84d" font-family="monospace">${f.pc?'OK':'****'}</text>
+       <rect x="340" y="264" width="10" height="26" fill="#444"/><rect x="450" y="264" width="10" height="26" fill="#444"/></g>
+     <path d="M690 306 L690 130 Q726 112 762 124 L762 342Z" fill="${f.pc?'#6e2222':'#2a2a2a'}" ${K}/><rect x="700" y="210" width="18" height="26" rx="3" fill="#111" ${K2}/><circle cx="709" cy="223" r="4" fill="${f.pc?'#4dd84d':'#e01b1b'}"/>
+     <text x="726" y="156" text-anchor="middle" font-size="10" font-weight="700" fill="#e9b949" font-family="'Comic Neue',cursive">OFICINA</text>`,
+    exits:f=>`<g ${H('go:calderas')}>${arrow(84,340,180,.8)}</g><g ${H('go:oficina')}>${arrow(706,354,0,.8)}</g>`},
+
+  oficina:{name:'Oficina del Marrano',dark:null,
+    draw:f=>`${shell(['#2a0808','#4a1414','#5e1c1c','#7a5a3a'])}
+     <path d="M150 288 H650" stroke="#c9a14a" stroke-width="4"/>
+     <g ${H('retrato')}><rect x="180" y="80" width="90" height="110" fill="#c9a14a" ${K}/><rect x="190" y="90" width="70" height="90" fill="#3a1010"/><g transform="translate(225,138) scale(.5)">${pig()}</g></g>
+     <g ${H('tvGrande')}><rect x="320" y="70" width="180" height="128" rx="12" fill="#222" ${K}/>
+       <rect x="332" y="82" width="156" height="104" rx="6" fill="${G&&G.portal?'#7a2aff':'#0a0a0a'}"/>
+       ${G&&G.portal?`<g transform="translate(410,134)"><g class="spin"><path d="M0 0 m-40 0 a40 40 0 1 0 40 -40 a28 28 0 1 0 -28 28 a16 16 0 1 0 16 -16" stroke="#e0b8ff" stroke-width="5" fill="none"/></g></g>`:''}
+       <rect x="360" y="200" width="100" height="18" fill="#333" ${K2}/><rect x="378" y="206" width="44" height="5" fill="#000"/></g>
+     <g ${H('escritorio')}><rect x="220" y="238" width="250" height="14" fill="#5a3010" ${K}/><rect x="230" y="252" width="230" height="38" fill="#4a2810" ${K}/><path d="M280 238 l14 -12 h34 l10 12" fill="#fff" ${K2}/></g>
+     <g ${H('cajaFuerte')}><rect x="560" y="200" width="80" height="80" rx="6" fill="#4a4f55" ${K}/>${f.cajaFuerte?`<rect x="566" y="206" width="68" height="68" fill="#111" ${K2}/>`:`<circle cx="600" cy="240" r="18" fill="#777" ${K2}/><path d="M600 222 V240" stroke="#000" stroke-width="3"/><rect x="622" y="236" width="12" height="8" fill="#ffd34d" ${K2}/>`}</g>
+     <g ${H('trofeos')}><rect x="520" y="120" width="110" height="8" fill="#5a3010" ${K2}/><path d="M540 120 v-16 h14 v16 M580 120 l6 -22 l6 22 M610 120 v-12 h12 v12" fill="#ffd34d" ${K2}/></g>`,
+    exits:f=>`<g ${H('go:vigilancia')}>${arrow(84,340,180,.8)}</g>`}
+};
+const ENTRY={
+  celda:{pasillo:[400,310]},
+  pasillo:{celda:[250,364],taller:[620,352],bano:[275,322],calderas:[360,344]},
+  taller:{pasillo:[560,364]},
+  bano:{pasillo:[330,362]},
+  calderas:{pasillo:[215,316],cocina:[130,352],vigilancia:[660,352]},
+  cocina:{calderas:[330,362],congelador:[640,352]},
+  congelador:{cocina:[150,352]},
+  vigilancia:{calderas:[150,352],oficina:[640,352]},
+  oficina:{vigilancia:[150,352]}
+};
+const ARROW_AT={
+  'go:pasillo':{celda:[400,312],taller:[400,356],bano:[400,356],calderas:[215,310]},
+  'go:celda':{pasillo:[400,356]},
+  'go:taller':{pasillo:[680,350]},
+  'go:bano':{pasillo:[275,306]},
+  'go:calderas':{pasillo:[360,336],cocina:[400,356],vigilancia:[120,352]},
+  'go:cocina':{calderas:[112,352],congelador:[120,352]},
+  'go:congelador':{cocina:[680,352]},
+  'go:vigilancia':{calderas:[690,352],oficina:[120,352]},
+  'go:oficina':{vigilancia:[680,352]}
+};
+/* puertas cerradas: devuelve lo que dice Juan, o nada si se puede pasar */
+function exitLock(to){
+  const f=G.f;
+  if(to==='vigilancia'&&G.room==='calderas'&&!f.breaker)return 'Esta puerta es eléctrica y no tiene energía. Ese panel de luces de la pared debe tener algo que ver.';
+  if(to==='taller'&&!f.rata)return 'La rata no me deja pasar al taller.';
+  if(to==='oficina'&&!f.pc)return 'Cerrada electrónicamente. Tal vez se abre desde el ordenador.';
+  return null;
+}
+/* zonas del piso que te matan */
+const TRAPS={calderas:[{x1:322,x2:478,y1:332,y2:374,death:'tablas'}]};
+const plateKg=f=>(f.pRueda?15:0)+(f.pPesa?20:0);
+
+/* ---------- estado, guardado y dibujo ---------- */
+function newGame(){
+  G={world:1,room:'celda',x:262,y:354,tx:262,ty:354,walking:false,cb:null,want:[262,354],chained:true,inv:[],sel:null,
+     f:{},seen:{celda:1},t:0,over:false,tvon:false,gears:[3,7,1],gang:null};
+  G.cp=snap();
+}
+function snap(){return JSON.stringify({world:G.world??1,room:G.room,x:G.x,y:G.y,chained:G.chained,inv:G.inv,f:G.f,seen:G.seen,gears:G.gears})}
+function loadSnap(js){const o=JSON.parse(js);Object.assign(G,o,{tx:o.x,ty:o.y,walking:false,cb:null,sel:null,gang:null,over:false,tvon:false,fight:null})}
+function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({cp:G.cp,t:G.t}))}catch(e){}}
+function readSave(){try{return JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){return null}}
+
+const depth=y=>.95*(.8+.2*Math.max(0,Math.min(1,(y-300)/72)));
+function ankle(){const s=depth(G.y);return [G.x-12*s,G.y-12*s]}
+function chained(){return G.room==='celda'&&G.chained}
+function chainD(){
+  const [ax,ay]=ankle();
+  const [ex,ey]=chained()?[RING.x,RING.y]:[ax-70,ay+10];
+  const mx=(ax+ex)/2, my=Math.max(ay,ey)+(chained()?Math.max(4,40-Math.hypot(ax-ex,ay-ey)/8):6);
+  return `M${ax.toFixed(1)} ${ay.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
+}
+function gRender(){
+  const R=ROOMS[G.room];
+  $('#scene').innerHTML=svg(`
+   ${R.draw(G.f)}
+   ${!G.f.power&&R.dark?`<rect width="800" height="380" fill="#120606" opacity=".42" pointer-events="none"/><g opacity=".13" pointer-events="none"><circle cx="${R.dark[0]}" cy="${R.dark[1]}" r="160" fill="#ff2a2a" class="flk"/></g>`:''}
+   ${R.pitch?`<defs><radialGradient id="lg"><stop offset="0" stop-color="#000"/><stop offset=".65" stop-color="#000"/><stop offset="1" stop-color="#fff"/></radialGradient>
+     <mask id="lmask"><rect width="800" height="380" fill="#fff"/><circle id="lmc" cx="${G.x}" cy="${G.y-90}" r="${G.inv.includes('linternaOn')?165:45}" fill="url(#lg)"/></mask></defs>
+     <rect width="800" height="380" fill="#000" opacity=".95" mask="url(#lmask)" pointer-events="none"/>`:''}
+   ${R.ex?exArrows(R):R.exits(G.f)}
+   ${fightFloor()}
+   <path id="ch1" stroke="#000" stroke-width="7" fill="none" pointer-events="none"/>
+   <path id="ch2" stroke="#9a9a9a" stroke-width="4" fill="none" stroke-dasharray="9 4" pointer-events="none"/>
+   ${G.room==='celda'?(G.chained?`<g ${H('argolla')}><circle cx="120" cy="310" r="22" fill="transparent"/><circle cx="120" cy="310" r="8" fill="none" stroke="#000" stroke-width="5"/><circle cx="120" cy="310" r="8" fill="none" stroke="#9a9a9a" stroke-width="2.5"/>
+     <circle cx="112" cy="300" r="3" fill="#555" ${K2}/><circle cx="128" cy="300" r="3" fill="#555" ${K2}/></g>`
+     :`<circle cx="114" cy="300" r="2.5" fill="#333"/><circle cx="126" cy="300" r="2.5" fill="#333"/>`):''}
+   ${motes()}
+   <g id="pj" class="juan" pointer-events="none"><g id="pjl" transform="rotate(${G.walking?(G.lean||0):0})"><g class="${G.fight?'tremble':''}"><g class="breathe"><g id="pjh">${juanBody()}</g></g></g></g>
+     <rect x="-22" y="-19" width="20" height="8" fill="#9a9a9a" ${K2}/></g>
+   ${R.front?R.front(G.f):""}
+   ${fightLayer()}
+   ${invBar(G)}${avatar()}`);
+  gPlace();
+}
+function gPlace(){
+  const pj=document.getElementById('pj');if(!pj)return;
+  if(!isFinite(G.x)||!isFinite(G.y)){const s=(ROOMS[G.room]&&ROOMS[G.room].start)||[400,360];G.x=G.tx=s[0];G.y=G.ty=s[1];G.walking=false;stage.classList.remove('walking')}
+  pj.setAttribute('transform',`translate(${G.x.toFixed(1)},${G.y.toFixed(1)}) scale(${depth(G.y).toFixed(3)})`);
+  const d=chainD();document.getElementById('ch1').setAttribute('d',d);document.getElementById('ch2').setAttribute('d',d);
+  const lm=document.getElementById('lmc');if(lm){lm.setAttribute('cx',G.x.toFixed(1));lm.setAttribute('cy',(G.y-90).toFixed(1))}
+}
+function clampPos(x,y){
+  y=Math.max(302,Math.min(372,y));
+  const xl=150-(y-290)*150/90+30, xr=650+(y-290)*150/90-30;
+  x=Math.max(xl,Math.min(xr,x));
+  if(chained()){
+    const s=depth(y),ax=x-12*s,ay=y-12*s,dx=ax-RING.x,dy=ay-RING.y,d=Math.hypot(dx,dy);
+    if(d>CHAIN_MAX){x=RING.x+dx/d*CHAIN_MAX+12*s;y=Math.max(302,Math.min(372,RING.y+dy/d*CHAIN_MAX+12*s))}
+  }
+  return [x,y];
+}
+function walkTo(x,y,cb){
+  if(!isFinite(x)||!isFinite(y)){x=G.x;y=G.y}
+  if(!isFinite(G.x)||!isFinite(G.y)){const s=(ROOMS[G.room]&&ROOMS[G.room].start)||[400,360];G.x=G.tx=s[0];G.y=G.ty=s[1]}
+  const [cx,cy]=clampPos(x,y);
+  G.tx=cx;G.ty=cy;G.cb=cb||null;G.want=[x,y];
+  if(G.walking)return;
+  G.walking=true;stage.classList.add('walking');
+  if(started)SFX.chain();
+  let last=performance.now();
+  const step=now=>{
+    if(!G||G.over){stage.classList.remove('walking');return}
+    const dt=Math.min(.05,(now-last)/1000);last=now;
+    const dx=G.tx-G.x,dy=G.ty-G.y,d=Math.hypot(dx,dy),v=190*dt;
+    if(d<=v){
+      G.x=G.tx;G.y=G.ty;gPlace();G.walking=false;stage.classList.remove('walking');
+      const pl=document.getElementById('pjl');if(pl)pl.setAttribute('transform','rotate(0)');
+      const c=G.cb;G.cb=null;if(c)c(Math.hypot(G.want[0]-G.x,G.want[1]-G.y));return;
+    }
+    const sg=Math.abs(dx)>4?Math.sign(dx):0;
+    if(sg&&sg*3!==G.look){G.look=sg*3;G.lean=sg*4;const h=document.getElementById('pjh');if(h)h.innerHTML=juanBody()}
+    const pl=document.getElementById('pjl');if(pl)pl.setAttribute('transform',`rotate(${G.lean||0})`);
+    G.x+=dx/d*v;G.y+=dy/d*v;gPlace();gRaf=requestAnimationFrame(step);
+  };
+  gRaf=requestAnimationFrame(step);
+}
+function changeRoom(to){
+  const from=G.room;fx('flicker');
+  setTimeout(()=>{
+    if(G.over)return;
+    if(from==='bano')G.f.dollStep=0;
+    if(ROOMS[from]&&ROOMS[from].leave)ROOMS[from].leave(G.f);
+    const RT=ROOMS[to],back=RT.ex&&RT.ex.find(x=>x.to===from);
+    const amb=FIGHTS[to]&&FIGHTS[to].ambush&&!G.f['fw_'+FIGHTS[to].id]?FIGHTS[to]:null;
+    if(amb)G.cp=snap();
+    G.room=to;let e=back&&back.at?back.at:((ENTRY[to]||{})[from]||RT.start||[400,360]);if(!isFinite(e[0])||!isFinite(e[1]))e=[400,360];G.x=G.tx=e[0];G.y=G.ty=e[1];G.sel=null;
+    if(RT.enter)RT.enter(G.f);
+    const first=!G.seen[to];G.seen[to]=1;if(!amb)G.cp=snap();saveGame();gRender();
+    if(amb){setTimeout(()=>{if(!G.over&&G.room===to)startFight(amb)},650);return}
+    const sc=$('#scene');sc.classList.remove('enter');void sc.offsetWidth;sc.classList.add('enter');
+    if(first&&ROOM_INTRO[to])setTimeout(()=>say(ROOM_INTRO[to]),400);
+    if(first&&ROOM_TAUNT[to])setTimeout(()=>{if(!G.over)tvSay(...ROOM_TAUNT[to])},4200);
+  },250);
+}
+const ROOM_TAUNT={
+  pasillo:['EL MARRANO','¿Te gusta mi sótano, Juan? Tengo muchas habitaciones... y mucha paciencia. Je je je.',1],
+  taller:['JUAN PABLO','¡JUAN! ¿¡Dónde estás!? ¡El palo ya me está rozando el pantalón!'],
+  calderas:['EL MARRANO','¿Te gusta la oscuridad, Juan? Cuidado con las tablas del piso... están más podridas que tus chistes.',1],
+  vigilancia:['JUAN PABLO','¡Juan! ¡Te estoy viendo por una cámara! ¡Ven ya, que esto avanza!'],
+  oficina:['EL MARRANO','¿Entrando a mi oficina sin permiso? Qué maleducado...',1]
+};
+const ROOM_INTRO={
+  pasillo:'Un pasillo... ¡¿Y ESA RATA?! Es del tamaño de un perro.',
+  taller:'¡Un taller! Aquí sí estoy en mi casa.',
+  bano:'Un baño asqueroso... ¿y ese muñeco del Marrano en la bañera? Me da mala espina.',
+  calderas:'¡No se ve nada! Menos mal que tengo la linterna... Cuidado dónde piso.',
+  cocina:'Una cocina. Huele a mortadela vieja.',
+  congelador:'¡BRRR! Aquí hace un frío que congela hasta las ideas.',
+  vigilancia:'¡Cámaras de todo el sótano!',
+  oficina:'La oficina del Marrano... muy elegante para ser un cerdo.'
+};
+
+/* ---------- globos y mensajes ---------- */
+function say(t,ms){
+  clearTimeout(sayT);clearInterval(sayTyper);
+  const s=depth(G.y), headTop=G.y-200*s;
+  bub.style.top='auto';bub.style.bottom=((450-headTop+14)/450*100)+'%';
+  bub.style.left=Math.max(22,Math.min(78,G.x/8))+'%';
+  bub.dataset.w='JUAN';bub.querySelector('.w').textContent='JUAN';bub.style.display='block';
+  const el=$('#btx');let k=0;el.textContent='';stage.classList.add('tk-juan');
+  sayTyper=setInterval(()=>{k++;el.textContent=t.slice(0,k);if(started&&k%2)SFX.type();
+    if(k>=t.length){clearInterval(sayTyper);stage.classList.remove('tk-juan')}},22);
+  sayT=setTimeout(()=>{bub.style.display='none';stage.classList.remove('tk-juan')},ms||t.length*42+2400);
+}
+function tvSay(who,t,voice){
+  cap.classList.remove('center');cap.classList.add('low');cap.style.display='block';
+  $('#ctx').textContent=(G.room==='celda'?'📺 ':'🔊 ')+who+': '+t;
+  if(G.room==='celda'){G.tvon=true;gRender()}
+  if(started){SFX.static();if(voice)speak(t)}
+  setTimeout(()=>{if(!G||G.over)return;cap.style.display='none';if(G.tvon){G.tvon=false;gRender()}},Math.max(4500,t.length*70));
+}
+function give(it){G.inv.push(it);G.sel=null;G.page=Math.floor((G.inv.length-1)/9);if(started){tone(880,.12,{type:'triangle',g:.15});tone(1320,.18,{type:'triangle',g:.12,delay:.1})}gRender();flyItem(it,G.inv.length-1)}
+/* el objeto vuela desde Juan hasta su casilla de abajo */
+function flyItem(it,k){
+  const sv=$('#scene svg');if(!sv||!ITEMS[it])return;
+  anim('pick');
+  const s=depth(G.y),x0=G.x,y0=G.y-150*s,x1=110+(k%9)*60,y1=415;
+  const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.setAttribute('pointer-events','none');
+  g.innerHTML=`<circle r="22" fill="#fff6a8" opacity=".55"/>${ITEMS[it].icon}`;sv.appendChild(g);
+  const t0=performance.now(),D=700;
+  const f=now=>{const t=Math.min(1,(now-t0)/D),e=t*t*(3-2*t),x=x0+(x1-x0)*e,y=y0+(y1-y0)*e-Math.sin(t*Math.PI)*90,sc=1.8-.8*e;
+    g.setAttribute('transform',`translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${sc.toFixed(2)})`);
+    if(t<1)requestAnimationFrame(f);else{g.innerHTML=`<circle r="26" fill="none" stroke="#ffe25e" stroke-width="5" class="sparkle"/>`;setTimeout(()=>g.remove(),650)}};
+  requestAnimationFrame(f);
+}
+function anim(c){stage.classList.remove(c);void stage.offsetWidth;stage.classList.add(c);clearTimeout(anim[c]);anim[c]=setTimeout(()=>stage.classList.remove(c),600)}
+function juanBody(){return chibi({...JUAN,juan:true,look:G.look||0,expr:G.fight?'scared':undefined})}
+/* polvo flotando en todas las salas */
+function motes(){let h=0;for(const c of G.room)h=(h*31+c.charCodeAt(0))%9973;
+  return `<g pointer-events="none">${[...Array(12)].map((_,i)=>{const x=60+((h*(i+3)*37)%680),y=120+((h*(i+7)*53)%230);
+    return `<circle cx="${x}" cy="${y}" r="${1.5+(i%3)}" fill="#fff" class="mote" style="animation-delay:-${(i*.77).toFixed(2)}s;animation-duration:${7+i%5}s"/>`}).join('')}</g>`}
+function drop(it){G.inv=G.inv.filter(i=>i!==it);if(G.sel===it)G.sel=null}
+
+/* ---------- cosas que se pueden tocar ---------- */
+const HS={celda:{
+  colchon:{at:[220,334],do(){if(G.f.colchon)return say('Un colchón asqueroso. Ya lo revisé.');G.f.colchon=1;give('sandwich');say('Huele a queso viejo... ¡había un sándwich mordido debajo! Qué asco... pero me lo llevo.')}},
+  baldosa:{at:[330,362],do(){if(G.f.baldosa)return say('Ahí ya no hay nada.');G.f.baldosa=1;give('llave');say('¡Una baldosa suelta! Y debajo... ¡una llave inglesa! Esto sí lo sé usar.')}},
+  argolla:{at:[176,348],uses:['llave'],do(){
+    if(G.sel==='llave'){G.chained=false;G.f.argolla=1;drop('llave');gRender();if(started)SFX.clank();say('Tornillos M12... ¡fuera! Ya me puedo mover, aunque arrastre la cadena.')}
+    else say('La cadena está atornillada a la pared con una argolla. Necesito una herramienta.')}},
+  caja:{at:[540,344],do(){if(G.f.control)return say('Una caja de madera vacía.');G.f.control=1;give('control');say('Un control remoto... de una tele sin cable. Típico.')}},
+  tv:{at:[548,344],uses:['destornillador','control'],do(){
+    if(G.sel==='control')return say('Le doy a todos los botones... nada. Esta tele hace lo que quiere.');
+    if(G.sel==='destornillador'){if(G.f.tvAbierta)return say('Ya le saqué el fusible.');G.f.tvAbierta=1;give('fusible');return say('Le quito la tapa de atrás... ¡un fusible! Esto le sirve a un generador.')}
+    G.f.acertijo=1;say('La tele se prendió sola...',1800);
+    setTimeout(()=>tvSay('EL MARRANO','¿Quieres el código de la reja? Son mis patas, mis ojos y mis orejas. En ese orden. Je je je.',1),900)}},
+  teclado:{at:[440,306],do(){if(G.f.reja)return say('La reja ya está abierta.');openKeypad({title:'Código de la reja',len:3,code:'422',onOK:()=>{G.f.reja=1;gRender();say('¡Se abrió la reja! Patas 4, ojos 2, orejas 2. Fácil.')}})}},
+  reja:{at:[400,306],do(){if(G.f.reja)return changeRoom('pasillo');say('Una reja cerrada. Tiene un teclado al lado... necesito un código de 3 números.')}},
+  charco:{at:[470,368],do(){say('No pienso tocar eso.')}},
+  arco:{at:[124,360],do(){say('Está muy oscuro ahí... y huele raro. Mejor no.')}}
+},pasillo:{
+  rata:{at:[500,352],uses:['sandwich'],do(){
+    if(G.f.rata)return say('Shhh... está dormida. Mejor no la despierto.');
+    if(G.sel==='sandwich'){drop('sandwich');G.f.rata=1;gRender();if(started)SFX.laugh();return say('Toma, ratita... ¡se lo comió de un bocado y se quedó dormida!')}
+    say('Esa rata no me deja pasar al taller. Si me acerco, me come. Tiene cara de hambre...')}},
+  rueda:{at:[150,350],do(){G.f.rueda=1;give('rueda');say('Una rueda de carro. Aquí dice 15 KG.')}},
+  ventilador:{at:[548,306],uses:['destornillador'],do(){
+    if(G.f.ventilador)return say('Ese ventilador ya no tiene correa.');
+    if(G.sel==='destornillador'){G.f.ventilador=1;give('correa');return say('Desatornillo la tapa... ¡una correa en buen estado!')}
+    say('Un ventilador viejo con 4 tornillos. La correa de adentro se ve buena.')}},
+  plano:{at:[405,306],do(){showPlano()}},
+  bano:{at:[275,306],uses:['palanca'],do(){
+    if(G.f.tablas)return changeRoom('bano');
+    if(G.sel==='palanca'){G.f.tablas=1;gRender();if(started)SFX.clank();return say('¡Crack! Arranco las tablas con la palanca. La puerta del baño quedó libre.')}
+    say('Dice WC. Está trabada con tablas clavadas. Necesito algo para hacer palanca.')}},
+  taller:{at:[680,350],do(){useHotspot('go:taller')}},
+  placa:{at:[507,364],uses:['rueda','pesa'],do(){
+    if(G.sel==='rueda'){G.f.pRueda=1;drop('rueda')}else if(G.sel==='pesa'){G.f.pPesa=1;drop('pesa')}
+    else return say(`Una placa de presión. Marca ${plateKg(G.f)} de 35 KG. Hay que ponerle peso encima.`);
+    gRender();if(started)SFX.thud();
+    if(plateKg(G.f)<35)return say(`${plateKg(G.f)} KG... falta peso.`);
+    checkCompuerta(true)}},
+  compuerta:{at:[360,336],do(){
+    if(G.f.compuerta)return changeRoom('calderas');
+    say('Una compuerta en el piso con motor. Al lado hay una placa que pide 35 KG.')}}
+},taller:{
+  generador:{at:[250,306],uses:['fusible','correa','engranaje'],do(){
+    const f=G.f;
+    if(f.power)return say('¡Ronronea como un V8! Bueno... como un V2.');
+    if(G.sel==='fusible'){f.gFusible=1;drop('fusible')}else if(G.sel==='correa'){f.gCorrea=1;drop('correa')}else if(G.sel==='engranaje'){f.gEngranaje=1;drop('engranaje')}
+    const falta=[!f.gFusible&&'un fusible',!f.gCorrea&&'una correa',!f.gEngranaje&&'un engranaje'].filter(Boolean);
+    gRender();
+    if(falta.length)return say('Un generador desarmado. Le falta: '+falta.join(', ')+'.');
+    f.power=1;gRender();if(started){SFX.clank();tone(60,1.5,{type:'sawtooth',g:.12,slide:110})}
+    say('¡Todo montado! Tiro de la cuerda y... ¡FUNCIONA! ¡Hay luz!');
+    setTimeout(()=>{if(!G.over)tvSay('EL MARRANO','Vaya, vaya... el ingeniero sabe arreglar cosas. Veamos si sabe salir vivo.',1)},4500);
+    checkCompuerta(false)}},
+  cables:{at:[640,330],do(){die('cables')}},
+  cajon:{at:[570,306],do(){if(G.f.cajon)return say('Un cajón vacío.');G.f.cajon=1;give('linterna');say('Una linterna... sin pilas, claro.')}},
+  bajo:{at:[545,310],uses:['linternaOn','linterna'],do(){
+    if(G.f.bajo)return say('Ya no hay nada debajo del banco.');
+    if(G.sel==='linternaOn'){G.f.bajo=1;give('engranajeT');return say('Alumbro debajo del banco... ¡un engranaje! Está todo torcido.')}
+    if(G.sel==='linterna')return say('Sin pilas no alumbra nada.');
+    say('Está muy oscuro debajo del banco. No pienso meter la mano sin ver.')}},
+  prensa:{at:[470,306],uses:['engranajeT'],do(){
+    if(G.sel==='engranajeT'){drop('engranajeT');give('engranaje');if(started)SFX.clank();return say('Lo pongo en la prensa y... ¡crac! Derechito. Ingeniería, señores.')}
+    say('Una prensa de banco. Sirve para enderezar o aplastar cosas.')}},
+  caja:{at:[595,306],do(){if(G.f.caja)return say('La caja de herramientas ya está abierta.');openGears()}},
+  pesa:{at:[188,368],do(){G.f.pesa=1;give('pesa');say('Uff... 20 KG. Menos mal que hago pierna.')}}
+},bano:{
+  tanque:{at:[222,306],do(){
+    if(G.f.tanque)return say('Solo hay agua... y cosas que no quiero saber.');
+    G.f.tanque=1;give('llavePaso');say('Levanto la tapa del tanque... ¡una manija de llave de paso! ¿Quién guarda esto aquí?')}},
+  lavabo:{at:[400,306],do(){
+    if(!G.f.caldera)return say('Abro el grifo del agua caliente... sale helada. La caldera debe estar apagada.');
+    if(G.f.espejo)return say('Sigue saliendo agua caliente. El espejo está todo empañado.');
+    G.f.espejo=1;gRender();say('¡Agua caliente! El espejo se empaña y aparecen unos números escritos con el dedo: 4 8 1 5.')}},
+  espejo:{at:[400,306],do(){say(G.f.espejo?'En el vapor del espejo se lee: 4 8 1 5.':'Un espejo sucio. Me veo cansado... pero guapo.')}},
+  banera:{at:[584,312],do(){
+    if(G.f.banera)return say('No pienso volver a abrir esa cortina.');
+    G.f.banera=1;if(started)SFX.sting();say('Abro la cortina y... ¡AAAH! Solo era una cucaracha gigante. La cierro rápido.')}},
+  muneco:{at:()=>{const p=dollPos();return [Math.max(190,p[0]-70),Math.max(310,Math.min(370,p[1]+6))]},uses:['bolsa'],noTick:1,do(){
+    if(G.f.munecoTapado)return say('Tapado. Así no me puede mirar.');
+    if(G.sel==='bolsa'){drop('bolsa');G.f.munecoTapado=1;gRender();return say('¡Le pongo la bolsa en la cabeza! Ahora no se mueve... creo.')}
+    say('Un muñeco del Marrano. Juraría que antes estaba en otro sitio...')}}
+},calderas:{
+  escalera:{at:[215,310],noTick:1,do(){changeRoom('pasillo')}},
+  palanca:{at:[272,306],do(){G.f.palanca=1;give('palanca');say('¡Una pata de cabra! Perfecta para arrancar cosas... o abrir puertas trabadas.')}},
+  caldera:{at:[385,310],uses:['llavePaso','encendedor'],do(){
+    const f=G.f;
+    if(f.caldera)return say('La caldera ronronea. Hay agua caliente en todo el sótano.');
+    if(G.sel==='llavePaso'){f.valvula=1;drop('llavePaso');gRender();return say('Pongo la manija en la llave de paso y abro el gas. Ahora hay que encender el piloto.')}
+    if(G.sel==='encendedor'){
+      if(!f.valvula)return say('Sin gas no prende nada. A la llave de paso le falta la manija.');
+      f.caldera=1;gRender();if(started){noise(1.2,{f:600,g:.4,a:.2});tone(80,1.2,{type:'sawtooth',g:.08})}
+      return say('¡FWOOSH! La caldera se encendió. Ahora debería haber agua caliente.')}
+    say(f.valvula?'Tiene gas, pero el piloto está apagado. Necesito fuego.':'Una caldera vieja. A la llave de paso le falta la manija, y el piloto está apagado.')}},
+  disyuntores:{at:[578,306],do(){if(G.f.breaker)return say('Todas las luces en verde. Hay energía en la puerta.');openLights()}}
+},cocina:{
+  estufa:{at:[236,306],uses:['encendedor','ollaHielo','olla','hielo'],do(){
+    const f=G.f;
+    if(G.sel==='hielo')return say('¿Directo al fuego? Se derrite y se pierde la llave por la estufa. Necesito un recipiente.');
+    if(G.sel==='olla')return say('Una olla vacía al fuego... ¿y qué cocino? ¿Aire?');
+    if(G.sel==='encendedor'){if(f.estufa)return say('Ya está prendida.');f.estufa=1;gRender();return say('¡Prendí la estufa! Fuego azul, como en las películas.')}
+    if(G.sel==='ollaHielo'){
+      if(!f.estufa)return say('La estufa está apagada. Primero hay que prenderla.');
+      drop('ollaHielo');f.ollaEnEstufa=1;gRender();say('Pongo la olla al fuego... el hielo se va derritiendo...',2600);
+      setTimeout(()=>{if(G.over)return;f.ollaEnEstufa=0;G.inv.push('olla');give('llaveDorada');say('¡Listo! Saco una llave dorada del agua. ¡Y quema!')},3000);return}
+    say(f.estufa?'La estufa está encendida.':'Una estufa de gas. Está apagada.')}},
+  cajonCocina:{at:[352,306],do(){if(G.f.cajonC)return say('Solo hay cubiertos sucios.');G.f.cajonC=1;give('encendedor');say('¡Un encendedor! Siempre útil en el sótano de un psicópata.')}},
+  fregadero:{at:[450,306],do(){if(G.f.fregadero)return say('Debajo del fregadero ya no hay nada útil.');G.f.fregadero=1;give('bolsa');say('Debajo del fregadero hay una bolsa de basura. Nueva... bueno, casi.')}},
+  alacena:{at:[400,306],do(){if(G.f.alacena)return say('La alacena está vacía.');G.f.alacena=1;give('olla');say('Una olla. ¿Quién cocina en un sótano así?')}},
+  nevera:{at:[575,306],do(){say('Solo hay mortadela y una nota: "NO TOCAR MI MORTADELA. — El Marrano". Mejor no la toco.')}},
+  congeladorPuerta:{at:[680,352],uses:['palanca'],do(){
+    if(G.f.congelador)return changeRoom('congelador');
+    if(G.sel==='palanca'){G.f.congelador=1;gRender();if(started)SFX.clank();return say('¡CRACK! Rompo el hielo de la manija con la palanca. ¡Abierta!')}
+    say('La puerta del congelador está congelada. La manija no se mueve ni a patadas.')}}
+},congelador:{
+  carne:{at:[400,330],do(){say('Jamones colgados... espero que sean de cerdo de verdad. Mejor no pregunto.')}},
+  hielo:{at:[415,318],do(){G.f.hielo=1;give('hielo');say('¡Hay una llave dentro de este bloque de hielo! Me lo llevo. ¡Brrr, quema de frío!')}},
+  cajas:{at:[220,320],do(){say('Cajas y cajas de mortadela. Este cerdo tiene un problema.')}}
+},vigilancia:{
+  monitores:{at:[400,330],do(){say('Cámaras de todo el sótano... ¡y en una sale Juan Pablo! Sigue en cuatro... aguanta, parce.')}},
+  pc:{at:[400,310],do(){
+    if(G.f.pc)return say('El ordenador ya me abrió la puerta de la oficina.');
+    openKeypad({title:'CONTRASEÑA',len:4,code:'4815',onOK:()=>{G.f.pc=1;gRender();say('¡Contraseña correcta! Se oyó un clic en la puerta de la oficina.')}})}}
+},oficina:{
+  retrato:{at:[225,310],do(){say('Un retrato del Marrano con traje. Qué ego tiene este cerdo.')}},
+  escritorio:{at:[345,320],do(){say('Unos papeles: "Plan maestro. Paso 1: secuestrar a Juan Pablo. Paso 2: ???. Paso 3: ¡ganancia!"')}},
+  trofeos:{at:[575,306],do(){say('"Campeón de crueldad 2023". Qué orgulloso.')}},
+  cajaFuerte:{at:[600,312],uses:['llaveDorada'],do(){
+    if(G.f.cajaFuerte)return say('La caja fuerte está vacía.');
+    if(G.sel==='llaveDorada'){drop('llaveDorada');G.f.cajaFuerte=1;give('cinta');if(started)SFX.door();return say('¡La llave dorada abre la caja fuerte! Hay una cinta VHS que dice "PARA JUAN".')}
+    say('Una caja fuerte con una cerradura dorada.')}},
+  tvGrande:{at:[410,306],uses:['cinta'],do(){
+    if(G.sel==='cinta'){drop('cinta');return endWorld1()}
+    say('Una tele enorme con reproductor VHS. Algo me dice que no es para ver novelas.')}}
+}};
+function checkCompuerta(fromPlate){
+  if(G.f.compuerta||plateKg(G.f)<35)return;
+  if(!G.f.power)return say('¡35 KG! Se oye un clic... pero el motor de la compuerta no tiene electricidad.');
+  G.f.compuerta=1;if(started)SFX.door();
+  if(G.room==='pasillo'){gRender();say('¡La compuerta se abrió! Hay una escalera hacia abajo...')}
+  else say('Se oyó algo pesado abrirse en el pasillo...');
+}
+function useHotspot(id){
+  if(id==='enemy')return fightUse();
+  if(id==='invpage'){G.page=(G.page||0)+1;if(G.page*9>=G.inv.length)G.page=0;return gRender()}
+  if(G.fight&&(id.startsWith('go:')||id==='tohub'))return say('¡No puedo huir! ¡Me alcanza! ¡Tengo que usar algo!',1800);
+  if(id==='tohub')return travelHub();
+  if(id.startsWith('go:')&&ROOMS[G.room].ex){
+    const to=id.slice(3),e=ROOMS[G.room].ex.find(x=>x.to===to);if(!e)return;
+    return walkTo(e.at[0],e.at[1],()=>{
+      if(G.over)return;const lock=e.lock?e.lock(G.f):null;
+      if(lock&&lock.die)return die(lock.die);if(lock)return say(lock);changeRoom(to)});
+  }
+  if(id.startsWith('go:')){
+    const to=id.slice(3), at=(ARROW_AT[id]||{})[G.room]||[G.x,G.y];
+    const lock=exitLock(to);
+    return walkTo(at[0],at[1],()=>{if(G.over)return;if(lock)return say(lock);changeRoom(to)});
+  }
+  if(id==='map')return showMap();
+  const h=(HS[G.room]||{})[id];if(!h)return;
+  const at=typeof h.at==='function'?h.at():h.at;
+  walkTo(at[0],at[1],miss=>{
+    if(G.over)return;
+    if(miss>45&&chained())return say('¡La cadena no me deja llegar hasta allá!');
+    if(ROOMS[G.room].pitch&&!G.inv.includes('linternaOn'))return say('Está demasiado oscuro. No veo nada.');
+    if(G.sel&&!(h.uses||[]).includes(G.sel)){G.sel=null;gRender();anim('nope');return say('Eso no sirve aquí.')}
+    h.do();
+    if(G.sel&&!G.over){G.sel=null;gRender()}
+    if(G.room==='bano'&&!h.noTick)dollTick();
+  });
+}
+/* el muñeco del baño se acerca cada vez que Juan hace algo */
+function dollTick(){
+  const f=G.f;if(f.munecoTapado||G.over)return;
+  f.dollStep=(f.dollStep||0)+1;
+  setTimeout(()=>{
+    if(G.over||G.room!=='bano')return;gRender();if(started)tone(90,.4,{type:'sawtooth',g:.12,slide:60});
+    if(f.dollStep===2)say('...¿Ese muñeco se movió?',2200);
+    if(f.dollStep===3)say('¡SE ESTÁ ACERCANDO! ¡Tengo que taparle los ojos con algo!',2600);
+    if(f.dollStep>=4)setTimeout(()=>die('muneco'),600);
+  },2600);
+}
+function selectItem(k){
+  const it=G.inv[k];if(!it)return;
+  if(G.sel&&G.sel!==it){
+    const r=RECIPES.find(r=>(r.a===G.sel&&r.b===it)||(r.b===G.sel&&r.a===it));
+    G.sel=null;
+    if(!r){gRender();return say('Eso no se puede combinar.')}
+    r.gone.forEach(drop);give(r.out);return say(r.say);
+  }
+  G.sel=G.sel===it?null:it;gRender();
+  if(G.sel)say(`${ITEMS[it].n}. Toca dónde usarlo o con qué combinarlo.`,2600);
+}
+function gClick(e){
+  if($('#panel').style.display==='flex')return;
+  const inv=e.target.closest('[data-inv]');if(inv)return selectItem(+inv.dataset.inv);
+  const hs=e.target.closest('[data-hs]');if(hs)return useHotspot(hs.dataset.hs);
+  const el=$('#scene svg');const pt=el.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
+  const p=pt.matrixTransform(el.getScreenCTM().inverse());
+  if(p.y<286||p.y>=380)return;
+  const tr=(TRAPS[G.room]||[]).find(t=>p.x>=t.x1&&p.x<=t.x2&&p.y>=t.y1&&p.y<=t.y2);
+  walkTo(p.x,p.y,tr?()=>{if(!G.over)die(tr.death)}:null);
+}
+
+/* ---------- ventanas: teclado, plano, engranajes, mapa ---------- */
+function panel(html){$('#pcontent').innerHTML=html;$('#panel').style.display='flex'}
+function openKeypad(o){
+  let code='';const blank='_'.repeat(o.len);
+  panel(`<div class="kp"><div class="kpt">${o.title}</div><div id="kpd">${blank.split('').join(' ')}</div>
+    <div class="kpg">${[1,2,3,4,5,6,7,8,9,'⌫',0,'OK'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div><div id="kpm"></div></div>`);
+  const draw=()=>{$('#kpd').textContent=(code+blank).slice(0,o.len).split('').join(' ')};
+  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=ev=>{
+    ev.stopPropagation();const k=b.dataset.k;if(started)tone(700,.05,{type:'square',g:.06});
+    if(k==='⌫')code=code.slice(0,-1);
+    else if(k==='OK'){
+      if(code===o.code){$('#kpm').textContent='✔ ¡CORRECTO!';$('#kpm').style.color='#4dd84d';if(started)SFX.door();
+        setTimeout(()=>{$('#panel').style.display='none';o.onOK()},900)}
+      else{$('#kpm').textContent='✖ Incorrecto';$('#kpm').style.color='#ff4d4d';code='';if(started)tone(150,.3,{type:'square',g:.1})}
+    }else if(code.length<o.len)code+=k;
+    draw();
+  });
+}
+function openLights(){
+  if(!G.f.lo)G.f.lo=LO_START.slice();
+  const draw=()=>G.f.lo.map((on,i)=>`<g data-lo="${i}" style="cursor:pointer"><rect x="${250+(i%3)*104}" y="${88+(i/3|0)*96}" width="88" height="80" rx="10" fill="${on?'#4dd84d':'#e01b1b'}" ${K}/>
+     <circle cx="${294+(i%3)*104}" cy="${128+(i/3|0)*96}" r="16" fill="${on?'#c8ffc8':'#5a0a0a'}" ${K2}/></g>`).join('');
+  panel(`<svg viewBox="0 0 800 450"><rect x="150" y="10" width="500" height="430" rx="20" fill="#666" ${K}/>
+    <text x="400" y="58" text-anchor="middle" font-family="'Comic Neue',cursive" font-weight="700" font-size="26" fill="#fff">PANEL DE ENERGÍA: todo en verde</text>
+    <g id="logrid">${draw()}</g>
+    <text x="400" y="420" text-anchor="middle" font-family="'Comic Neue',cursive" font-weight="700" font-size="18" fill="#ddd">Cada botón cambia él mismo y los de al lado (arriba, abajo, izquierda, derecha)</text></svg>`);
+  const bind=()=>document.querySelectorAll('[data-lo]').forEach(el=>el.addEventListener('click',ev=>{
+    ev.stopPropagation();if(G.f.breaker)return;
+    loPress(G.f.lo,+el.dataset.lo);if(started)tone(500,.06,{type:'square',g:.07});
+    document.getElementById('logrid').innerHTML=draw();bind();
+    if(G.f.lo.every(Boolean)){G.f.breaker=1;if(started)SFX.clank();
+      setTimeout(()=>{$('#panel').style.display='none';gRender();say('¡Todo verde! La luz de la puerta de la derecha cambió a verde.')},700)}
+  }));
+  bind();
+}
+function endWorld1(){portalTo(0,'Muy bien, Juan... pero tu amigo ya no está aquí. Si lo quieres, ven a buscarlo... ¡AL OTRO LADO! JE JE JE.')}
+function showPlano(){
+  const g=(x,y,r,p,l)=>`<g transform="translate(${x},${y})"><g transform="rotate(${p*45})"><circle r="${r}" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="8 6"/><path d="M0 0 V${-r+8}" stroke="#ffe25e" stroke-width="5" stroke-linecap="round"/><path d="M-9 ${-r+16} L0 ${-r+4} L9 ${-r+16}Z" fill="#ffe25e"/></g><text y="${r+30}" text-anchor="middle" font-size="24" font-weight="700" fill="#fff" font-family="'Comic Neue',cursive">${l}</text></g>`;
+  panel(`<svg viewBox="0 0 800 450"><defs><pattern id="pg" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#3a7ac0" stroke-width="1"/></pattern></defs>
+    <rect x="40" y="20" width="720" height="410" fill="#1d5fa0" ${K}/><rect x="40" y="20" width="720" height="410" fill="url(#pg)"/>
+    <text x="400" y="66" text-anchor="middle" font-family="'Comic Neue',cursive" font-weight="700" font-size="28" fill="#fff">PLANO: CERRADURA DE LA CAJA DE HERRAMIENTAS</text>
+    ${g(240,210,60,GEAR_GOAL[0],'A')}${g(370,210,60,GEAR_GOAL[1],'B')}${g(560,210,52,GEAR_GOAL[2],'C')}
+    <text x="400" y="345" text-anchor="middle" font-family="'Comic Neue',cursive" font-weight="700" font-size="24" fill="#ffe25e">Nota: los engranajes que se tocan giran al revés.</text>
+    <rect x="560" y="370" width="180" height="46" fill="none" stroke="#fff" stroke-width="2"/><text x="572" y="398" font-family="monospace" font-size="15" fill="#fff">DIBUJÓ: EL MARRANO</text></svg>`);
+}
+function gearSVG(r,n){
+  const dash=(Math.PI*r/n).toFixed(2);
+  return `<circle r="${r}" fill="none" stroke="#000" stroke-width="${r*.36}" stroke-dasharray="${dash} ${dash}"/>
+   <circle r="${r}" fill="none" stroke="#c9ccd1" stroke-width="${r*.28}" stroke-dasharray="${dash} ${dash}"/>
+   <circle r="${r*.84}" fill="#c9ccd1" ${K}/><circle r="${r*.18}" fill="#666" ${K}/>
+   <path d="M0 ${-r*.16} V${-r*.62}" stroke="#c1121f" stroke-width="9" stroke-linecap="round"/>
+   <path d="M-13 ${-r*.52} L0 ${-r*.8} L13 ${-r*.52}Z" fill="#c1121f" ${K2}/>`;
+}
+function openGears(){
+  if(!G.gang)G.gang=G.gears.map(p=>p*45);
+  panel(`<svg viewBox="0 0 800 450">
+    <rect x="10" y="10" width="780" height="430" rx="24" fill="#c1121f" ${K}/><rect x="40" y="80" width="720" height="300" rx="16" fill="#a8b0b5" ${K}/>
+    <text x="400" y="56" text-anchor="middle" font-family="'Comic Neue',cursive" font-weight="700" font-size="28" fill="#fff">Caja de herramientas: toca los engranajes</text>
+    <g transform="translate(250,226)"><g id="gr0" data-gear="0" style="cursor:pointer;transition:transform .35s;transform:rotate(${G.gang[0]}deg)">${gearSVG(72,16)}</g></g>
+    <g transform="translate(394,226)"><g id="gr1" data-gear="1" style="cursor:pointer;transition:transform .35s;transform:rotate(${G.gang[1]}deg)">${gearSVG(72,16)}</g></g>
+    <g transform="translate(590,226)"><g id="gr2" data-gear="2" style="cursor:pointer;transition:transform .35s;transform:rotate(${G.gang[2]}deg)">${gearSVG(62,14)}</g></g>
+    <g font-family="'Comic Neue',cursive" font-weight="700" font-size="26" text-anchor="middle"><text x="250" y="342">A</text><text x="394" y="342">B</text><text x="590" y="342">C</text></g>
+    <text id="gmsg" x="400" y="416" text-anchor="middle" font-family="'Comic Neue',cursive" font-weight="700" font-size="22" fill="#fff">Hmm... seguro hay un plano de esta cerradura en algún lado.</text>
+  </svg>`);
+  document.querySelectorAll('[data-gear]').forEach(el=>el.addEventListener('click',ev=>{
+    ev.stopPropagation();if(G.f.caja)return;
+    const i=+el.dataset.gear, turn=(j,dir)=>{G.gears[j]+=dir;G.gang[j]+=dir*45;document.getElementById('gr'+j).style.transform=`rotate(${G.gang[j]}deg)`};
+    if(i===0){turn(0,1);turn(1,-1)}else if(i===1){turn(1,1);turn(0,-1)}else turn(2,1);
+    if(started)tone(300+i*80,.08,{type:'square',g:.08});
+    if(G.gears.map(p=>((p%8)+8)%8).every((p,j)=>p===GEAR_GOAL[j])){
+      G.f.caja=1;document.getElementById('gmsg').textContent='¡CLAC! ¡Se abrió!';
+      if(started)SFX.clank();
+      setTimeout(()=>{$('#panel').style.display='none';give('destornillador');say('¡Un destornillador! Ahora sí puedo desarmar cosas.')},1000);
+    }
+  }));
+}
+function showMap(){
+  const W=WORLDS[G.world]||WORLDS[1],M=W.map;
+  const box=([id,x,y,l])=>{const seen=G.seen[id],cur=G.room===id;
+    return `<rect x="${x-64}" y="${y-32}" width="128" height="64" rx="8" fill="${seen?'#f1e3bc':'#555'}" stroke="${cur?'#c1121f':'#000'}" stroke-width="${cur?7:3}"/>
+     <text x="${x}" y="${y+7}" text-anchor="middle" font-family="'Comic Neue',cursive" font-weight="700" font-size="19" fill="${seen?'#000':'#999'}">${seen?l:'?'}</text>${cur?`<text x="${x}" y="${y+26}" text-anchor="middle" font-size="12" font-weight="700" fill="#c1121f" font-family="'Comic Neue',cursive">ESTÁS AQUÍ</text>`:''}`};
+  panel(`<svg viewBox="0 0 800 450"><rect x="10" y="10" width="780" height="430" rx="16" fill="#fff8dc" ${K}/>
+    <path d="${M.links}" stroke="#000" stroke-width="6" stroke-dasharray="10 6"/>
+    ${M.boxes.map(box).join('')}<text x="560" y="420" text-anchor="middle" font-family="'Comic Neue',cursive" font-weight="700" font-size="20">${G.world?'MUNDO '+G.world+' · ':''}${W.title}</text></svg>`);
+}
+
+/* ---------- reloj, morir, ganar, perder ---------- */
+function fmt(t){return String(t/60|0).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
+function hud(){$('#gclock').textContent=fmt(G.t);$('#gclock').classList.toggle('low',G.t<=60);$('#pbar').style.width=((GAME_TIME-G.t)/GAME_TIME*100)+'%'}
+function gameTick(){
+  if(!G||G.over)return;
+  G.t++;if(G.t%15===0)saveGame();
+}
+function endScreen(win,title,sub,btns,handlers){
+  if(typeof endFight==='function')endFight();$('#endH').style.display='none';
+  G.over=true;clearInterval(gTick);cancelAnimationFrame(gRaf);stage.classList.remove('walking');
+  clearTimeout(sayT);bub.style.display='none';cap.style.display='none';$('#panel').style.display='none';$('#hud').style.display='none';
+  const e=$('#end');e.classList.toggle('win',win);$('#endT').textContent=title;$('#endS').textContent=sub;$('#endB').innerHTML=btns;e.style.display='flex';
+  Object.entries(handlers||{}).forEach(([id,fn])=>{const b=document.getElementById(id);if(b)b.onclick=fn});
+}
+const DEATHS={
+  rata:['¡LA RATA TE COMIÓ!','Era una rata del tamaño de un perro... y tenía hambre. Debiste darle algo de comer primero.'],
+  cables:['¡ZZZZZT!','Juan tocó los cables pelados y quedó como pollo frito. Un ingeniero debería saberlo...'],
+  tablas:['¡EL PISO SE ROMPIÓ!','Las tablas podridas no aguantaron a Juan... y abajo había un pozo de aguas negras. Fíjate bien dónde pisas.'],
+  muneco:['¡EL MUÑECO TE ATRAPÓ!','Cada vez que hacías algo, el muñeco se acercaba un poco más... hasta que te mordió el tobillo. Hay que taparle los ojos.']
+};
+function die(kind){
+  if(started){SFX.scream();SFX.thud()}
+  fx('shake');
+  const [t,s]=DEATHS[kind];
+  endScreen(false,'💀 '+t,s,`<button class="big" id="retry">↺ Volver a intentarlo</button>`,{retry:retryCP});
+}
+function retryCP(){
+  endFight();const t=G.t;loadSnap(G.cp);G.t=t;
+  $('#end').style.display='none';
+  clearInterval(gTick);gTick=setInterval(gameTick,1000);gRender();
+  setTimeout(()=>say('Otra vez... esta vez con cuidado.'),400);
+}
+function lose(){
+  if(started){SFX.scream();SFX.thud()}
+  try{localStorage.removeItem(SAVE_KEY)}catch(e){}
+  endScreen(false,'¡SE ACABÓ EL TIEMPO!','El palo llegó a su destino... Juan Pablo no se va a poder sentar en un buen tiempo 😭',
+    `<button class="big" id="retry">↺ Empezar de nuevo</button>`,{retry:()=>startGame(false)});
+}
+function finishPart1(){
+  if(G.over)return;
+  if(started){tone(523,.2,{type:'triangle',g:.2});tone(659,.2,{type:'triangle',g:.2,delay:.18});tone(784,.4,{type:'triangle',g:.2,delay:.36})}
+  saveGame();
+  endScreen(true,'¡FIN DE LA PARTE 1!',`Juan baja por la compuerta hacia el cuarto de calderas... Tiempo jugado: ${fmt(G.t)}. Juan Pablo sigue esperando. PARTE 2 · PRÓXIMAMENTE`,
+    `<button class="big" id="retry">↺ Jugar desde el principio</button><br><button class="link" id="intro">🎬 Ver la intro</button>`,{retry:()=>startGame(false),intro:begin});
+}
+function startGame(cont){
+  mode='game';clearTimeout(autoT);finishType();try{speechSynthesis.cancel()}catch(e){}
+  ['#title','#final','#end','#panel'].forEach(q=>$(q).style.display='none');
+  bub.style.display='none';cap.style.display='none';$('#skip').style.display='none';
+  clearInterval(clockT);clearInterval(gTick);
+  newGame();
+  const sv=cont&&readSave();
+  if(sv){loadSnap(sv.cp);G.cp=sv.cp;G.t=sv.t}else{try{localStorage.removeItem(SAVE_KEY)}catch(e){}}
+  lastKey='';gRender();
+  G.t=G.t>=GAME_TIME?0:G.t;
+  gTick=setInterval(gameTick,1000);clearInterval(roomT);roomT=setInterval(roomTick,250);
+  if(!sv){
+    cap.classList.remove('center');cap.classList.add('low');cap.style.display='block';
+    $('#ctx').textContent='Toca el piso para caminar. Toca las cosas para mirarlas o recogerlas. Toca un objeto de abajo y luego otro para combinarlos.';
+    setTimeout(()=>{if(G&&!G.over&&$('#ctx').textContent.startsWith('Toca el piso'))cap.style.display='none'},7000);
+  }
+  setTimeout(()=>{if(G&&!G.over)say(sv?'Sigo donde me quedé...':'Tengo que salir de aquí... ¡y rápido!')},600);
+}
+
+/* ================= MUNDOS (registro, puertas, portal, final) ================= */
+const WORLDS={
+  1:{title:'El sótano del Marrano',start:'celda',pos:[262,354],back:'oficina',backPos:[410,360],
+     map:{boxes:[['bano',300,60,'Baño'],['celda',130,160,'Celda'],['pasillo',300,160,'Pasillo'],['taller',470,160,'Taller'],
+       ['cocina',130,262,'Cocina'],['calderas',300,262,'Calderas'],['vigilancia',470,262,'Vigilancia'],['oficina',640,262,'Oficina'],['congelador',130,364,'Congelador']],
+       links:'M194 160H236M364 160H406M300 128V92M300 192V230M194 262H236M364 262H406M534 262H576M130 294V332'}}
+};
+/* posiciones típicas de las flechas de salida: izquierda, derecha, abajo, fondo */
+const EX={L:{a:[84,340,180],at:[176,354]},R:{a:[716,354,0],at:[628,354]},D:{a:[400,348,90],at:[476,362]},B:x=>({a:[x,300,-90],at:[x+58,318]})};
+function exArrows(R){return R.ex.filter(e=>!e.show||e.show(G.f)).map(e=>`<g ${H('go:'+e.to)}>${arrow(e.a[0],e.a[1],e.a[2],.8)}</g>`).join('')}
+/* puertas dibujadas en la pared izquierda, derecha o del fondo */
+function doorR(fill,label,extra){return `<path d="M690 306 L690 130 Q726 112 762 124 L762 342Z" fill="${fill}" ${K}/>${label?`<rect x="698" y="100" width="58" height="18" rx="3" fill="#e9b949" ${K2}/><text x="727" y="114" text-anchor="middle" font-size="10" font-weight="700" font-family="'Comic Neue',cursive">${label}</text>`:''}${extra||''}`}
+function doorL(fill,label,extra){return `<path d="M110 306 L110 130 Q74 112 38 124 L38 342Z" fill="${fill}" ${K}/>${label?`<rect x="44" y="100" width="58" height="18" rx="3" fill="#e9b949" ${K2}/><text x="73" y="114" text-anchor="middle" font-size="10" font-weight="700" font-family="'Comic Neue',cursive">${label}</text>`:''}${extra||''}`}
+function doorB(x,fill,label,extra){return `<rect x="${x-40}" y="150" width="80" height="140" fill="${fill}" ${K}/><circle cx="${x+28}" cy="224" r="4" fill="#e9b949" ${K2}/>${label?`<rect x="${x-34}" y="124" width="68" height="20" rx="3" fill="#fff" ${K2}/><text x="${x}" y="139" text-anchor="middle" font-size="12" font-weight="700" font-family="'Comic Neue',cursive">${label}</text>`:''}${extra||''}`}
+function txt(x,y,s,size,fill,anchor){return `<text x="${x}" y="${y}" text-anchor="${anchor||'middle'}" font-family="'Comic Neue',cursive" font-weight="700" font-size="${size||14}" fill="${fill||'#000'}">${s}</text>`}
+
+let roomT=null;
+function roomTick(){if(mode!=='game'||!G||G.over)return;
+  if(!G.walking&&!G.fight&&Math.random()<.02){G.look=[-3,0,3][Math.random()*3|0];const h=document.getElementById('pjh');if(h)h.innerHTML=juanBody()}const R=ROOMS[G.room];if(R&&R.tick)R.tick(G.f);if(typeof fightCheck==='function')fightCheck()}
+
+/* cartel de "MUNDO N" entre mundo y mundo */
+function worldCard(n,cb){
+  let c=document.getElementById('wcard');
+  if(!c){c=document.createElement('div');c.id='wcard';c.className='overlay';stage.appendChild(c)}
+  const W=WORLDS[n];
+  c.innerHTML=`<div class="wc-n">MUNDO ${n}</div><div class="wc-t">${W.title}</div><div class="wc-s">${W.card||''}</div><div class="wc-h">toca para seguir</div>`;
+  c.style.display='flex';if(started){SFX.sting();if(W.cardVoice)setTimeout(()=>speak(W.cardVoice),600)}
+  let done=false;const go=()=>{if(done)return;done=true;c.style.display='none';try{speechSynthesis.cancel()}catch(e){}cb()};
+  c.onclick=ev=>{ev.stopPropagation();go()};setTimeout(go,9000);
+}
+/* fin de un mundo: la tele se vuelve un portal */
+function portalTo(n,line){
+  G.portal=true;gRender();if(started){SFX.static();SFX.sting()}
+  if(line)tvSay('EL MARRANO',line,1);
+  setTimeout(()=>{if(!G.over)say('¿Qué? ¡La tele está haciendo un remolino! ¡ME ESTÁ CHUPANDO!')},2500);
+  setTimeout(()=>{
+    if(G.over)return;fx('flash');fx('shake');if(started){noise(1.5,{type:'bandpass',f:500,q:.6,g:.5,a:.4});tone(200,1.5,{type:'sawtooth',g:.1,slide:1200})}
+    const w=G.world;G.f['mundo'+w]=1;G.f['done'+w]=1;G.portal=false;bub.style.display='none';cap.style.display='none';
+    G.inv=G.inv.filter(i=>!ITEMS[i]||ITEMS[i].w!==w||ITEMS[i].x);
+    G.over=true;worldDone(w,()=>{G.over=false;goHub(w>1?HUB_LINE[w]:'')});
+  },7500);
+}
+function startWorld(n,again){
+  const W=WORLDS[n];endFight();
+  G.world=n;G.sel=null;G.chained=false;G.walking=false;G.f['seenW'+n]=1;
+  const r=again&&W.back?W.back:W.start,ps=again&&W.backPos?W.backPos:W.pos;
+  G.room=r;G.x=G.tx=ps[0];G.y=G.ty=ps[1];G.seen[r]=1;
+  G.cp=snap();saveGame();lastKey='';gRender();
+  if(again)return setTimeout(()=>say('Otra vez en '+W.title.toLowerCase()+'... ¿qué me faltó aquí?',2600),600);
+  if(W.arrive)setTimeout(()=>say(W.arrive),700);
+  if(W.taunt)setTimeout(()=>{if(!G.over)tvSay(...W.taunt)},5500);
+}
+/* cartel de "MUNDO N SUPERADO" */
+function worldDone(w,cb){
+  let c=document.getElementById('wcard');
+  if(!c){c=document.createElement('div');c.id='wcard';c.className='overlay';stage.appendChild(c)}
+  c.innerHTML=`<div class="wc-n">¡MUNDO ${w} SUPERADO!</div><div class="wc-t">${WORLDS[w].title}</div><div class="wc-s">${w===1?'La tele escupe a Juan en un cuarto lleno de teles...':'De vuelta al cuarto de las teles. Se encendió un bombillo de cerdito.'} Tiempo jugado: ${fmt(G.t)}</div><div class="wc-h">toca para seguir</div>`;
+  c.style.display='flex';if(started)SFX.sting();
+  let done=false;const go=()=>{if(done)return;done=true;c.style.display='none';cb()};
+  c.onclick=ev=>{ev.stopPropagation();go()};setTimeout(go,7000);
+}
+const HUB_LINE={2:'¿Saliste de mi hospital? Qué suerte... Pero sin los 4 trozos de mi corazón, Juan Pablo se queda encadenado. JE JE.',
+  3:'¿Arreglaste mi carro? Qué tierno. Los trozos de mi corazón siguen escondidos... ¿o ya los tienes todos?',
+  4:'¡Bravo, payaso! Cuando los 3 bombillos estén prendidos, la tele 5 te llevará a MI mente. Ahí está Juan Pablo.'};
+/* irse al cuarto de las teles desde un mundo */
+function travelHub(){
+  say('¡Me voy al cuarto de las teles!',1400);if(started){SFX.static();tone(200,1.2,{type:'sawtooth',g:.08,slide:1200})}
+  G.over=true;setTimeout(()=>{fx('flash');G.over=false;goHub()},1300);
+}
+
+/* ---------- puzles reutilizables ---------- */
+const pzWin=(msg,cb)=>{if(started)SFX.door();const m=document.getElementById('pzm');if(m){m.textContent=msg||'✔ ¡CORRECTO!';m.style.color='#4dd84d'}setTimeout(()=>{$('#panel').style.display='none';cb()},900)};
+const pzBad=(msg)=>{if(started)tone(150,.3,{type:'square',g:.1});const m=document.getElementById('pzm');if(m){m.textContent=msg||'✖ Incorrecto';m.style.color='#ff4d4d'}};
+const beep=f=>{if(started)tone(f||700,.05,{type:'square',g:.06})};
+/* candado de letras */
+function openLetters(o){
+  const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ';const v=Array(o.len).fill(0);
+  const draw=()=>v.map((x,i)=>`<div class="lt"><button data-u="${i}">▲</button><div class="ltc">${A[x]}</div><button data-d="${i}">▼</button></div>`).join('');
+  panel(`<div class="kp"><div class="kpt">${o.title}</div><div class="ltw" id="ltw">${draw()}</div><div class="kpg1"><button id="ltok">OK</button></div><div id="pzm"></div></div>`);
+  const bind=()=>{document.querySelectorAll('[data-u],[data-d]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();beep();
+    const i=+(b.dataset.u??b.dataset.d);v[i]=(v[i]+(b.dataset.u!==undefined?1:25))%26;$('#ltw').innerHTML=draw();bind()})};bind();
+  $('#ltok').onclick=ev=>{ev.stopPropagation();v.map(x=>A[x]).join('')===o.code?pzWin(null,o.onOK):pzBad()};
+}
+/* botones de colores en orden */
+function openSequence(o){
+  let seq=[];
+  panel(`<div class="kp"><div class="kpt">${o.title}</div><div id="sqd" class="sqd"></div>
+    <div class="sqg">${o.buttons.map(b=>`<button data-s="${b.id}" style="background:${b.color}">${b.label||''}</button>`).join('')}</div><div id="pzm"></div></div>`);
+  const draw=()=>{$('#sqd').innerHTML=o.code.map((_,i)=>`<span class="${i<seq.length?'on':''}"></span>`).join('')};draw();
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();beep(400+o.buttons.findIndex(x=>x.id===b.dataset.s)*120);
+    seq.push(b.dataset.s);
+    if(seq[seq.length-1]!==o.code[seq.length-1]){seq=[];draw();return o.onWrong?($('#panel').style.display='none',o.onWrong()):pzBad('✖ Así no es... empieza otra vez')}
+    draw();if(seq.length===o.code.length)pzWin(null,o.onOK)});
+}
+/* palancas arriba/abajo */
+function openLevers(o){
+  const v=Array(o.n).fill(0);
+  const draw=()=>v.map((x,i)=>`<button class="lv ${x?'up':''}" data-lv="${i}"><span></span><b>${o.labels?o.labels[i]:i+1}</b></button>`).join('');
+  panel(`<div class="kp"><div class="kpt">${o.title}</div><div class="lvw" id="lvw">${draw()}</div><div class="kpg1"><button id="lvok">${o.ok||'PROBAR'}</button></div><div id="pzm"></div></div>`);
+  const bind=()=>document.querySelectorAll('[data-lv]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();beep(300);v[+b.dataset.lv]^=1;$('#lvw').innerHTML=draw();bind()});bind();
+  $('#lvok').onclick=ev=>{ev.stopPropagation();if(v.join('')===o.code)return pzWin(null,o.onOK);if(o.onWrong){$('#panel').style.display='none';return o.onWrong()}pzBad()};
+}
+/* elegir una opción (cables, gavetas, espejos...) */
+function openChoice(o){
+  panel(`<div class="kp"><div class="kpt">${o.title}</div><div class="chg" style="grid-template-columns:repeat(${o.cols||o.options.length},1fr)">${o.options.map((op,i)=>`<button data-ch="${i}" style="${op.color?'background:'+op.color:''}">${op.label}</button>`).join('')}</div><div id="pzm">${o.hint||''}</div></div>`);
+  document.querySelectorAll('[data-ch]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();beep();
+    const i=+b.dataset.ch;if(i===o.correct)return pzWin(o.okMsg,o.onOK);$('#panel').style.display='none';o.onWrong(i)});
+}
+/* reloj: poner la hora */
+function openClock(o){
+  let h=12,m=0;
+  const face=()=>`<svg viewBox="0 0 200 200" width="100%"><circle cx="100" cy="100" r="92" fill="#fff8dc" ${K}/>
+    ${[...Array(12)].map((_,i)=>`<text x="${100+Math.sin(i*Math.PI/6)*74}" y="${108-Math.cos(i*Math.PI/6)*74}" text-anchor="middle" font-size="18" font-weight="700" font-family="'Comic Neue',cursive">${i||12}</text>`).join('')}
+    <path d="M100 100 L${100+Math.sin(((h%12)+m/60)*Math.PI/6)*46} ${100-Math.cos(((h%12)+m/60)*Math.PI/6)*46}" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+    <path d="M100 100 L${100+Math.sin(m*Math.PI/30)*70} ${100-Math.cos(m*Math.PI/30)*70}" stroke="#c1121f" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="100" r="7" fill="#000"/></svg>`;
+  panel(`<div class="kp"><div class="kpt">${o.title}</div><div id="clk" class="clk">${face()}</div>
+    <div class="kpg"><button id="hm">− hora</button><button id="hp">+ hora</button><button id="ok1">OK</button><button id="mm">− min</button><button id="mp">+ min</button><span></span></div><div id="pzm"></div></div>`);
+  const up=()=>{$('#clk').innerHTML=face()};
+  $('#hp').onclick=e=>{e.stopPropagation();beep();h=h%12+1;up()};$('#hm').onclick=e=>{e.stopPropagation();beep();h=(h+10)%12+1;up()};
+  $('#mp').onclick=e=>{e.stopPropagation();beep();m=(m+15)%60;up()};$('#mm').onclick=e=>{e.stopPropagation();beep();m=(m+45)%60;up()};
+  $('#ok1').onclick=e=>{e.stopPropagation();(h===o.h&&m===o.m)?pzWin(null,o.onOK):pzBad()};
+}
+/* grúa: llevar el gancho hasta el objetivo sin chocar */
+function openCrane(o){
+  let r=o.start[0],c=o.start[1];const N=o.size;
+  const wall=(a,b)=>o.walls.some(w=>w[0]===a&&w[1]===b);
+  const draw=()=>{let s='';for(let a=0;a<N;a++)for(let b=0;b<N;b++){const x=b*70+10,y=a*70+10;
+    s+=`<rect x="${x}" y="${y}" width="64" height="64" rx="6" fill="${wall(a,b)?'#7a2a1a':(a===o.target[0]&&b===o.target[1])?'#4dd84d':'#ccc'}" ${K2}/>`;
+    if(wall(a,b))s+=`<path d="M${x+8} ${y+20}h48v24h-48z" fill="#c1121f" ${K2}/>`;
+    if(a===o.target[0]&&b===o.target[1])s+=`<rect x="${x+12}" y="${y+22}" width="40" height="22" rx="4" fill="#2f6db0" ${K2}/>`;}
+    s+=`<g transform="translate(${c*70+42},${r*70+42})"><path d="M0 -40 V-6" stroke="#000" stroke-width="4"/><path d="M-12 -6 Q0 18 12 -6" stroke="#e9b949" stroke-width="6" fill="none"/></g>`;
+    return `<svg viewBox="0 0 ${N*70+20} ${N*70+20}" width="100%">${s}</svg>`};
+  panel(`<div class="kp"><div class="kpt">${o.title}</div><div id="crg" class="crg">${draw()}</div>
+    <div class="kpg"><span></span><button data-mv="-1,0">▲</button><span></span><button data-mv="0,-1">◀</button><button id="crok">BAJAR</button><button data-mv="0,1">▶</button><span></span><button data-mv="1,0">▼</button><span></span></div><div id="pzm"></div></div>`);
+  document.querySelectorAll('[data-mv]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();const [dr,dc]=b.dataset.mv.split(',').map(Number);
+    const nr=r+dr,nc=c+dc;if(nr<0||nc<0||nr>=N||nc>=N)return beep(150);if(wall(nr,nc)){beep(120);return pzBad('¡Choca con un carro!')}
+    r=nr;c=nc;beep(500);$('#crg').innerHTML=draw()});
+  $('#crok').onclick=ev=>{ev.stopPropagation();(r===o.target[0]&&c===o.target[1])?pzWin('✔ ¡Enganchado!',o.onOK):pzBad('Ahí no hay nada que enganchar')};
+}
+
+/* ---------- final del juego ---------- */
+function gameFinale(){
+  G.over=true;clearInterval(gTick);bub.style.display='none';cap.style.display='none';$('#hud').style.display='none';
+  G.f.final=1;saveGame();
+  $('#scene').innerHTML=svg(`<rect width="800" height="450" fill="#ffd02e"/><polygon points="${burst(400,225,24,560,340)}" fill="#ff9a2e" ${K}/>
+    <g transform="translate(300,380) scale(1.25)" class="juan"><g class="breathe">${chibi({...JUAN,juan:true,expr:'normal'})}</g></g>
+    <g transform="translate(500,380) scale(1.25)"><g class="breathe">${jpStand()}</g></g>
+    ${txt(400,70,'¡JUAN PABLO ESTÁ A SALVO!',44,'#fff')}`,'#000');
+  if(started){[523,659,784,1046].forEach((f,i)=>tone(f,.35,{type:'triangle',g:.2,delay:i*.18}))}
+  setTimeout(()=>{
+    endScreen(true,'🎉 ¡FIN! 🎉',`Juan Atencia rescató a Juan Pablo de los 5 mundos del Marrano. Juan Pablo se podrá volver a sentar... algún día. Tiempo total: ${fmt(G.t)}. Gracias por jugar.`,
+      `<button class="big" id="retry">↺ Jugar desde el principio</button><br><button class="link" id="intro">🎬 Ver la intro</button>`,{retry:()=>startGame(false),intro:begin});
+  },5000);
+}
+/* Juan Pablo de pie (para el final) */
+function jpStand(){
+  return chibi({juan:false,shirt:'#1b1b1b',pants:'#3a4a6a',skin:JP_SKIN,expr:'normal'}).replace(/<g transform="translate\(0,-130\) scale\(1.12\)">[\s\S]*$/,'')+
+    `<g transform="translate(0,-130) scale(1.12)">${headFront({skin:JP_SKIN,hair:'#1a1412',expr:'normal'})}
+     <path d="M-30 -18 Q-34 -44 -14 -48 Q-6 -58 8 -50 Q22 -56 30 -40 Q38 -26 30 -10 Q24 -26 10 -28 Q-6 -34 -30 -18Z" fill="#1a1412" ${K}/></g>`;
+}
+
+/* ================= MOTOR ================= */
+const $=q=>document.querySelector(q);
+const stage=$('#stage'),bub=$('#bub'),cap=$('#cap');
+let walkT=null,idx=-1,typer=null,autoT=null,lastKey='',clockT=null,started=false,txtEl=null;
+
+function fx(f){
+  if(!f)return;
+  const el=f==='flicker'?$('#dark'):f==='flash'?$('#flash'):stage;
+  const cls=f==='flicker'?'flick':f==='flash'?'on':'shake';
+  el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);
+}
+function finishType(){
+  if(typer){clearInterval(typer);typer=null}
+  const s=S[idx];if(s&&s.txt&&txtEl)txtEl.textContent=s.txt;
+  stage.classList.remove('talk','tk-juan','tk-jp');
+}
+function go(n){
+  idx=n;clearTimeout(autoT);finishType();
+  try{speechSynthesis.cancel()}catch(e){}
+  const s=S[idx];if(!s)return;
+  if(s.final){showFinal();return}
+  const key=[s.sc,s.pig,s.tv,s.tvon,s.scared,s.walk,s.jx].join('|');
+  if(key!==lastKey){$('#scene').innerHTML=SC[s.sc](s);lastKey=key}
+  fx(s.fx);
+  if(started&&s.snd)SFX[s.snd]();
+  bub.style.display='none';cap.style.display='none';txtEl=null;
+  if(s.txt){
+    if(s.who){
+      const p=s.b||(POS[s.sc]||{})[s.who]||[50,4];
+      bub.style.left=p[0]+'%';bub.style.top=p[1]+'%';bub.style.bottom='auto';bub.dataset.w=s.who;
+      bub.querySelector('.w').textContent=s.who;bub.style.display='block';txtEl=$('#btx');
+    }else{
+      cap.classList.remove('low');cap.classList.toggle('center',s.sc==='negro');cap.style.display='block';txtEl=$('#ctx');
+    }
+    txtEl.textContent='';let k=0;
+    if(s.tv==='puppet')stage.classList.add('talk');
+    if(s.who==='JUAN')stage.classList.add('tk-juan');
+    if(s.who==='JUAN PABLO')stage.classList.add('tk-jp');
+    typer=setInterval(()=>{k++;txtEl.textContent=s.txt.slice(0,k);
+      if(started&&s.who&&k%2)SFX.type();
+      if(k>=s.txt.length)finishType()},30);
+    if(started&&s.voice)speak(s.txt);
+  }
+  clearTimeout(walkT);stage.classList.remove('walking');
+  if(s.walk){stage.classList.add('walking');walkT=setTimeout(()=>stage.classList.remove('walking'),WALK_T*1000)}
+  if(s.auto)autoT=setTimeout(()=>go(idx+1),s.auto);
+}
+function next(){
+  if(idx<0||$('#final').style.display==='flex')return;
+  if(typer){finishType();return}
+  go(idx+1);
+}
+function showFinal(){
+  bub.style.display='none';cap.style.display='none';
+  $('#scene').innerHTML=SC.sala({scared:1,arrows:1});lastKey='';
+  clearInterval(clockT);
+  $('#contgame').style.display=readSave()?'':'none';
+  $('#final').style.display='flex';
+  if(started)SFX.thud();
+}
+function begin(){
+  started=true;ac();startDrone();mode='intro';
+  if(G)G.over=true;clearInterval(gTick);cancelAnimationFrame(gRaf);
+  ['#title','#final','#end','#hud','#panel'].forEach(q=>$(q).style.display='none');
+  $('#skip').style.display='';clearInterval(clockT);
+  lastKey='';go(0);
+}
+
+stage.addEventListener('click',e=>{
+  if(e.target.closest('button')||e.target.closest('#panel'))return;
+  if(mode==='game'){if(G&&!G.over)gClick(e);return}
+  next();
+});
+document.addEventListener('keydown',e=>{if(mode!=='game'&&(e.key===' '||e.key==='Enter'||e.key==='ArrowRight')){e.preventDefault();next()}});
+$('#play').onclick=begin;
+$('#again').onclick=begin;
+$('#playgame').onclick=()=>{started=true;ac();startDrone();startGame(false)};
+$('#contgame').onclick=()=>{started=true;ac();startDrone();startGame(true)};
+$('#contTitle').onclick=()=>{started=true;ac();startDrone();startGame(true)};
+(()=>{const sv=readSave();if(sv){let w=1;try{w=JSON.parse(sv.cp).world??1}catch(e){}const b=$('#contTitle');b.style.display='';b.textContent=w?'⏩ Continuar partida (Mundo '+w+')':'⏩ Continuar partida (Cuarto de las Teles)'}})();
+$('#pclose').onclick=()=>{$('#panel').style.display='none'};
+$('#skip').onclick=()=>{if(idx>=0){clearTimeout(autoT);finishType();try{speechSynthesis.cancel()}catch(e){};go(S.length-1)}};
+$('#mute').onclick=()=>{muted=!muted;$('#mute').textContent=muted?'🔇':'🔊';if(master)master.gain.value=muted?0:1;if(muted)try{speechSynthesis.cancel()}catch(e){}};
+
+/* estática animada de la tele */
+setInterval(()=>{const n=document.getElementById('nzT');if(n)n.setAttribute('seed',Math.random()*999|0)},70);
+
+/* pruebas: #p=N abre directo en el paso N */
+window.addEventListener('DOMContentLoaded',()=>{
+  const m=location.hash.match(/p=(\d+)/);
+  if(m){$('#title').style.display='none';go(+m[1]);finishType()}
+  if(location.hash==='#game')startGame(false);
+  const w=location.hash.match(/w=(\d+)/);if(w){startGame(false);G.f.hub=1;if(+w[1])startWorld(+w[1]);else goHub()}
+});
+</script>
+<script src="mundos/saw.js"></script>
+<script src="mundos/m2-hospital.js"></script>
+<script src="mundos/m3-desguace.js"></script>
+<script src="mundos/m4-circo.js"></script>
+<script src="mundos/m5-dimension.js"></script>
+<script src="mundos/online.js"></script>
+</body>
+</html>
