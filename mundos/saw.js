@@ -27,7 +27,7 @@ function enemyPos(F){
 function enemyTr(F){const p=enemyPos(F);return `translate(${p[0].toFixed(1)},${p[1].toFixed(1)}) scale(${(F.flip?-1:1)*p[2]},${p[2]})`}
 function fightLayer(){
   const F=fightOf();if(!F)return '';
-  return `<g id="enemy" ${H('enemy')} transform="${enemyTr(F)}"><rect x="-70" y="-${F.h||150}" width="140" height="${F.h||150}" fill="transparent"/>
+  return `<g id="enemy" ${H('enemy')} transform="${enemyTr(F)}"><ellipse cx="0" cy="-2" rx="70" ry="12" fill="#000" opacity=".28"/><rect x="-70" y="-${F.h||150}" width="140" height="${F.h||150}" fill="transparent"/>
    <g class="${G.fight?'fatk':'fidle'}">${F.draw(!!G.fight)}</g></g>`;
 }
 /* se mira en cada vuelta del motor de la sala */

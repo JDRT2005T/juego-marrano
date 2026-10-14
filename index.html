@@ -440,7 +440,7 @@ function invBar(g){
   if(g){g.page=Math.min(g.page||0,pages-1)}const p0=g?(g.page||0)*N:0;
   for(let j=0;j<N;j++){const k=p0+j;
     const it=g&&g.inv[k], sel=it&&g.sel===it;
-    slots+=`<g ${g?`data-inv="${k}" style="cursor:pointer"`:''}><rect x="${86+j*60}" y="392" width="48" height="46" rx="4" fill="${sel?'#ffe25e':'#111'}" stroke="${sel?'#fff':'#3a3a3a'}" stroke-width="2"/>
+    slots+=`<g ${g?`data-inv="${k}" style="cursor:pointer"`:''}><rect x="${86+j*60}" y="392" width="48" height="46" rx="4" fill="${sel?'#ffe25e':'#fff'}" stroke="${sel?'#ff8a1e':'#000'}" stroke-width="${sel?4:2}"/>
       ${it?`<g transform="translate(${110+j*60},415)">${ITEMS[it].icon}</g>`:''}</g>`;
   }
   if(g&&pages>1)slots+=`<g data-hs="invpage" style="cursor:pointer"><rect x="628" y="392" width="66" height="46" rx="6" fill="#333" stroke="#fff" stroke-width="2"/>
@@ -1013,7 +1013,7 @@ function gRender(){
      <circle cx="112" cy="300" r="3" fill="#555" ${K2}/><circle cx="128" cy="300" r="3" fill="#555" ${K2}/></g>`
      :`<circle cx="114" cy="300" r="2.5" fill="#333"/><circle cx="126" cy="300" r="2.5" fill="#333"/>`):''}
    ${motes()}
-   <g id="pj" class="juan" pointer-events="none"><g id="pjl" transform="rotate(${G.walking?(G.lean||0):0})"><g class="${G.fight?'tremble':''}"><g class="breathe"><g id="pjh">${juanBody()}</g></g></g></g>
+   <g id="pj" class="juan" pointer-events="none"><ellipse cx="0" cy="-2" rx="46" ry="10" fill="#000" opacity=".28"/><g id="pjl" transform="rotate(${G.walking?(G.lean||0):0})"><g class="${G.fight?'tremble':''}"><g class="breathe"><g id="pjh">${juanBody()}</g></g></g></g>
      <rect x="-22" y="-19" width="20" height="8" fill="#9a9a9a" ${K2}/></g>
    ${R.front?R.front(G.f):""}
    ${fightLayer()}
@@ -1047,7 +1047,7 @@ function walkTo(x,y,cb){
   if(started)SFX.chain();
   let last=performance.now();
   const step=now=>{
-    if(!G||G.over){stage.classList.remove('walking');return}
+    if(!G||G.over){if(G)G.walking=false;stage.classList.remove('walking');return}
     const dt=Math.min(.05,(now-last)/1000);last=now;
     const dx=G.tx-G.x,dy=G.ty-G.y,d=Math.hypot(dx,dy),v=190*dt;
     if(d<=v){
@@ -1754,6 +1754,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 <script src="mundos/m3-desguace.js"></script>
 <script src="mundos/m4-circo.js"></script>
 <script src="mundos/m5-dimension.js"></script>
+<script src="mundos/comic.js"></script>
 <script src="mundos/online.js"></script>
 </body>
 </html>

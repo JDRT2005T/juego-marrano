@@ -112,6 +112,7 @@ c_final:{name:'Detrás del telón',start:[400,360],
      ${f.c_narizPuesta?`<rect x="-44" y="48" width="88" height="44" fill="${G&&G.portal?'#7a2aff':'#111'}"/>${G&&G.portal?`<g transform="translate(0,70)"><g class="spin"><path d="M0 0 m-18 0 a18 18 0 1 0 18 -18 a11 11 0 1 0 -11 11" stroke="#e0b8ff" stroke-width="4" fill="none"/></g></g>`:''}`:''}</g>`,
   ex:[{to:'c_montana',...EX.L}]}
 });
+window.lion=lion;
 function lion(scared){
   return `<g><ellipse cx="30" cy="-30" rx="56" ry="30" fill="#d9a040" ${KK}/><path d="M80 -40 Q110 -60 100 -80" stroke="#d9a040" stroke-width="6" fill="none"/>
    <circle cx="-30" cy="-50" r="40" fill="#a0522d" ${KK}/><circle cx="-30" cy="-48" r="26" fill="#e8b860" ${k2}/>

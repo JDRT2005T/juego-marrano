@@ -44,6 +44,7 @@ function car(x,y,f,full){
    ${full?'':`<g font-size="11">${['d_piston','d_bujia','d_bateria','d_volante','d_llave'].map((k,i)=>`<circle cx="${-56+i*28}" cy="-40" r="8" fill="${p[k]?'#4dd84d':'#555'}" ${k2}/>`).join('')}</g>`}
   </g>`;
 }
+window.dog=dog;
 function dog(sleep){
   return `<g><path d="M40 -10 Q70 -20 64 -50" stroke="#000" stroke-width="8" fill="none"/><path d="M40 -10 Q70 -20 64 -50" stroke="#a0805a" stroke-width="4" fill="none"/>
    <ellipse cx="10" cy="-30" rx="46" ry="30" fill="#a0805a" ${KK}/><rect x="-30" y="-10" width="14" height="30" rx="6" fill="#a0805a" ${k2}/><rect x="30" y="-10" width="14" height="30" rx="6" fill="#a0805a" ${k2}/>

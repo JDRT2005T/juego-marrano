@@ -29,6 +29,7 @@ async function connect(code,onReady){
   }catch(e){console.warn('en vivo no disponible',e)}
 }
 const send=(event,payload)=>{if(ready&&ch)ch.send({type:'broadcast',event,payload})};
+if(!VER){window.liveSend=(e,p)=>send(e,p);window.comicSend=(id,i)=>send('comic',{id,i})}
 
 /* ---------------- EL QUE JUEGA ---------------- */
 function player(){
@@ -91,7 +92,7 @@ function viewer(){
       /* pantallas de muerte / final */
       const e=$('#end');
       if(s.end){e.classList.toggle('win',s.end.win);$('#endT').textContent=s.end.t;$('#endS').textContent=s.end.s;$('#endB').innerHTML='';
-        const h=$('#endH');h.textContent=s.end.h;h.style.display=s.end.h?'block':'none';e.style.display='flex';const kl=document.getElementById('kill');if(kl)kl.style.display='none'}
+        const h=$('#endH');h.textContent=s.end.h;h.style.display=s.end.h?'block':'none';e.style.display='flex';e.classList.toggle('angel',!s.end.win);let an=document.getElementById('angel');if(!s.end.win&&typeof angelJuan==='function'){if(!an){an=document.createElement('div');an.id='angel';e.insertBefore(an,$('#endS'))}if(an.style.display!=='block'){an.innerHTML=angelJuan();an.style.display='block'}}else if(an)an.style.display='none';const kl=document.getElementById('kill');if(kl)kl.style.display='none'}
       else e.style.display='none';
       if(!s.panel)$('#panel').style.display='none';
       let wc=document.getElementById('wcard');
@@ -102,7 +103,8 @@ function viewer(){
     c.on('broadcast',{event:'tv'},({payload:p})=>{if(!first){const o=G.over;G.over=false;tvSay(p.w,p.t);G.over=o}});
     c.on('broadcast',{event:'panel'},({payload:p})=>{$('#pcontent').innerHTML=p.html;$('#panel').style.display='flex'});
     c.on('broadcast',{event:'kill'},({payload:p})=>{const F=FIGHTS[p.room];if(F)killShow(F)});
-    c.on('broadcast',{event:'fin'},()=>{try{gameFinale()}catch(e){}});
+    c.on('broadcast',{event:'comic'},({payload:p})=>comicShow(p.id,p.i));
+    c.on('broadcast',{event:'chat'},({payload:p})=>{let el=document.getElementById('chat');if(!el){el=document.createElement('div');el.id='chat';stage.appendChild(el)}el.innerHTML=p.html;el.style.display=p.html?'block':'none'});
     c.on('presence',{event:'sync'},()=>{});
     setTimeout(()=>send('hola',{}),1500);
   });
