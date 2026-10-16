@@ -75,6 +75,7 @@ function player(){
 /* ---------------- EL QUE MIRA ---------------- */
 function viewer(){
   document.body.classList.add('ver');mode='ver';
+  saveGame=function(){};   /* el que mira no pisa su propia partida guardada con la del amigo */
   ['#title','#final','#skip'].forEach(q=>{const e=$(q);if(e)e.style.display='none'});
   newGame();G.over=true;
   $('#scene').innerHTML=svg(`<rect width="800" height="450" fill="#14001f"/>${txt(400,200,'👀 Esperando a que tu amigo juegue...',30,'#ffe25e')}${txt(400,250,'Sala '+VER,22,'#fff')}${txt(400,300,'(toca la pantalla para activar el sonido)',16,'#aaa')}`);
