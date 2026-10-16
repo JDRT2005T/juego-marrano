@@ -7,6 +7,8 @@
    Prensa: palancas → sube la prensa → volante del carro aplastado (si entras con la prensa abajo, mueres).
    Marranomóvil (patio): pistón + bujía + batería cargada + volante → arrancar → portal. */
 (function(){
+/* si el aerosol se perdió (sin aerosol ni lanzallamas y el Marrano sigue vivo), se puede agarrar otro */
+const aerosolPerdido=()=>!G.inv.includes('aerosol')&&!G.inv.includes('lanzallamas')&&!G.f.fw_marrano;
 const KK=K, k2=K2;
 Object.assign(ITEMS,{
   costilla:{n:'Costilla asada',icon:`<path d="M-14 6 Q-6 -14 12 -8 Q16 4 4 10Z" fill="#a0522d" ${k2}/><path d="M8 -6 L16 -14" stroke="#000" stroke-width="6" stroke-linecap="round"/><path d="M8 -6 L16 -14" stroke="#f4f0e0" stroke-width="3" stroke-linecap="round"/>`},
@@ -114,7 +116,7 @@ d_pintura:{name:'Taller de pintura',start:[400,360],
      ${f.d_cargando?`<rect x="498" y="224" width="${Math.min(64,(f.d_carga||0)*16)}" height="22" fill="#4dd84d"/>`:txt(530,240,f.d_bateriaOk?'100%':'CARGADOR',10,'#4dd84d')}
      <path d="M500 290 Q480 320 520 330" stroke="#c1121f" stroke-width="4" fill="none"/><path d="M560 290 Q590 320 550 330" stroke="#111" stroke-width="4" fill="none"/>
      ${f.d_cargando?`<rect x="510" y="318" width="40" height="26" rx="3" fill="#333" ${k2}/>`:''}</g>
-   <g ${H('aerosol')}>${f.d_aerosol?'':`<rect x="452" y="262" width="14" height="28" rx="3" fill="#2f6db0" ${k2}/><rect x="455" y="256" width="8" height="7" fill="#999" ${k2}/>${txt(459,252,'🔥',10)}`}</g>
+   <g ${H('aerosol')}>${f.d_aerosol&&!aerosolPerdido()?'':`<rect x="452" y="262" width="14" height="28" rx="3" fill="#2f6db0" ${k2}/><rect x="455" y="256" width="8" height="7" fill="#999" ${k2}/>${txt(459,252,'🔥',10)}`}</g>
    <g ${H('taquilla')}><rect x="596" y="110" width="50" height="180" fill="${f.d_taquilla?'#333':'#7a8a9a'}" ${KK}/><path d="M604 126 h34 M604 134 h34 M604 142 h34" stroke="#000" stroke-width="2"/>
      ${txt(621,104,'DR. MARRANO',8,'#fff')}${f.d_taquilla?'':`<rect x="610" y="190" width="22" height="28" rx="3" fill="#222" ${k2}/><circle cx="621" cy="198" r="3" fill="#e01b1b"/>`}</g>
    <g ${H('cabina')}><rect x="340" y="120" width="110" height="170" fill="#cfd8e0" opacity=".7" ${KK}/>${txt(395,140,'CABINA',12)}<path d="M360 290 Q395 230 430 290" fill="#2f6db0" opacity=".6"/></g>`,
@@ -209,7 +211,8 @@ d_pintura:{
   posterP:{at:[240,312],do(){say('Un cartel: "PRENSA: SEGURIDAD". Dibujó flechas: arriba, abajo, arriba, arriba, abajo.')}},
   cabina:{at:[395,312],do(){if(!G.f.d_cableTV){G.f.d_cableTV=1;give('cableTV');return say('Detrás de la cabina de pintura hay un cable de antena enrollado. ¿Pa\' qué lo quiero? ...Me lo llevo.')}
     say('La cabina de pintura. Huele tan fuerte que veo cerditos voladores.')}},
-  aerosol:{at:[459,318],do(){if(G.f.d_aerosol)return say('Ya me llevé el aerosol.');G.f.d_aerosol=1;give('aerosol');gRender();say('Un aerosol de pintura azul. Dice "MUY INFLAMABLE: NO ACERCAR AL FUEGO". Mmm... interesante.')}},
+  aerosol:{at:[459,318],do(){if(G.f.d_aerosol&&aerosolPerdido()){give('aerosol');gRender();return say('Quedaba otro aerosol inflamable en el estante. Este no lo pierdo.')}
+    if(G.f.d_aerosol)return say('Ya me llevé el aerosol.');G.f.d_aerosol=1;give('aerosol');gRender();say('Un aerosol de pintura azul. Dice "MUY INFLAMABLE: NO ACERCAR AL FUEGO". Mmm... interesante.')}},
   taquilla:{at:[610,330],do(){
     if(G.f.d_taquilla)return say('La taquilla del Dr. Marrano ya está vacía.');
     openKeypad({title:'TAQUILLA DR. MARRANO · clave: "el año en que me gradué"',len:4,code:'2013',onOK:()=>{G.f.d_taquilla=1;gRender();give('trozo3');say('¡2013! Adentro hay una bata de doctor... ¡y un trozo de corazón rosa!')}})}},
