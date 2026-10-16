@@ -1271,7 +1271,8 @@ const HS={celda:{
     if(G.sel==='llaveDorada'){drop('llaveDorada');G.f.cajaFuerte=1;give('cinta');if(started)SFX.door();return say('¡La llave dorada abre la caja fuerte! Hay una cinta VHS que dice "PARA JUAN".')}
     say('Una caja fuerte con una cerradura dorada.')}},
   tvGrande:{at:[410,306],uses:['cinta'],do(){
-    if(G.sel==='cinta'){drop('cinta');return endWorld1()}
+    if(G.f.cintaPuesta&&!G.f.done1)return endWorld1();
+    if(G.sel==='cinta'){drop('cinta');G.f.cintaPuesta=1;return endWorld1()}
     say('Una tele enorme con reproductor VHS. Algo me dice que no es para ver novelas.')}}
 }};
 function checkCompuerta(fromPlate){
@@ -1525,11 +1526,12 @@ function worldCard(n,cb){
 }
 /* fin de un mundo: la tele se vuelve un portal */
 function portalTo(n,line){
+  if(G._pt&&Date.now()-G._pt<6000&&Date.now()>=G._pt)return;G._pt=Date.now();
   G.portal=true;gRender();if(started){SFX.static();SFX.sting()}
   if(line)tvSay('EL MARRANO',line,1);
   setTimeout(()=>{if(!G.over)say('¿Qué? ¡La tele está haciendo un remolino! ¡ME ESTÁ CHUPANDO!')},2500);
   setTimeout(()=>{
-    if(G.over)return;fx('flash');fx('shake');if(started){noise(1.5,{type:'bandpass',f:500,q:.6,g:.5,a:.4});tone(200,1.5,{type:'sawtooth',g:.1,slide:1200})}
+    if(G.over){G.portal=false;G._pt=0;if(G.room)gRender();return}fx('flash');fx('shake');if(started){noise(1.5,{type:'bandpass',f:500,q:.6,g:.5,a:.4});tone(200,1.5,{type:'sawtooth',g:.1,slide:1200})}
     const w=G.world;G.f['mundo'+w]=1;G.f['done'+w]=1;G.portal=false;bub.style.display='none';cap.style.display='none';
     G.inv=G.inv.filter(i=>!ITEMS[i]||ITEMS[i].w!==w||ITEMS[i].x);
     G.over=true;worldDone(w,()=>{G.over=false;goHub(w>1?HUB_LINE[w]:'')});

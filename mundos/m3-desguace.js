@@ -167,7 +167,7 @@ d_patio:{
     if(G.sel&&map[G.sel]){f[map[G.sel]]=1;drop(G.sel);gRender();if(started)SFX.clank()}
     const falta=[!f.d_piston&&'el pistón',!f.d_bujia&&'la bujía',!f.d_bateria&&'una batería cargada',!f.d_volante&&'el volante',!f.d_llave&&'la llave (la del llavero de cerdito, que no sé dónde está)'].filter(Boolean);
     if(falta.length)return say('El Marranomóvil. Le falta: '+falta.join(', ')+'.');
-    if(f.d_listo)return;
+    if(f.d_listo){if(!f.done3)portalTo(0,'¿Arreglaste mi carro? Qué tierno. Ahora vente a mi circo... JA JA JA.');return}
     f.d_listo=1;if(started){tone(70,2.5,{type:'sawtooth',g:.14,slide:180});noise(2,{f:400,g:.3,a:.3})}
     say('¡Todo montado! Giro la llave y... ¡BRRRUM! ¡ARRANCÓ! ¡Ingeniería mecánica, nena!',3500);
     setTimeout(()=>portalTo(0,'¿Arreglaste mi carro? Qué tierno. Ahora vente a mi circo... Juan Pablo es la atracción principal. JA JA JA.'),3800)}}

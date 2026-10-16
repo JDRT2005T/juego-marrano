@@ -256,6 +256,7 @@ h_direccion:{
     say('Un frasco con formol y... ¡un trozo de corazón rosa! Tiene un ganchito de metal. No voy a meter la mano ahí ni loco.')}},
   esqueleto:{at:[220,320],do(){say('Un esqueleto de clase. Tiene puesta una peluca. Raro.')}},
   monitor:{at:[610,312],do(){
+    if(G.f.h_latido&&!G.f.done2)return portalTo(0,'Ja ja ja... el hospital se te quedó pequeño, Juan. Te espero en mi desguace.');
     if(G.f.h_latido)return say('El monitor late tranquilo.');
     openSequence({title:'MONITOR CARDÍACO: dale el ritmo',buttons:[{id:'v',color:'#3aa83a'},{id:'r',color:'#e01b1b'},{id:'a',color:'#2f6db0'},{id:'y',color:'#e9b949'}],code:['v','r','r','a','y'],
       onOK:()=>{G.f.h_latido=1;gRender();say('¡Bip, bip, bip! El corazón late... ¡y la tele se encendió sola!');

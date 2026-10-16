@@ -201,6 +201,7 @@ c_montana:{
 },
 c_final:{
   payaso:{at:[270,344],uses:['nariz'],do(){
+    if(G.f.c_narizPuesta&&!G.f.done4)return portalTo(0,'Llegaste lejos, Juan... Ahora ven a MI mundo. ¡JA JA JA JA!');
     if(G.f.c_narizPuesta)return say('La boca del payaso tiene una tele adentro...');
     if(G.sel==='nariz'){G.f.c_narizPuesta=1;drop('nariz');gRender();if(started)SFX.laugh();say('Le pongo la nariz al payaso gigante y... ¡JA JA JA! ¡abre la boca! Tiene una tele adentro.',3000);
       return setTimeout(()=>portalTo(0,'Llegaste lejos, Juan... Ahora ven a MI mundo. La dimensión del Marrano. Juan Pablo y yo te esperamos... ¡JA JA JA JA!'),3200)}
