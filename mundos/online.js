@@ -38,8 +38,16 @@ function player(){
     c.on('presence',{event:'sync'},()=>{const st=c.presenceState();viewers=Object.values(st).flat().filter(x=>x.role==='ver').length;showBadge()});
     c.on('broadcast',{event:'hola'},()=>{lastSent='';sendPanel(true)});
   });
-  const showBadge=()=>badge(`📡 EN VIVO · código <b>${code}</b>${viewers?` · 👀 ${viewers}`:''}`);
+  /* tocar el cartel lo minimiza (queda solo 📡) o lo vuelve a abrir; además se minimiza solo a los 6 s */
+  let mini=false;try{mini=localStorage.getItem('marrano-live-mini')==='1'}catch(e){}
+  const showBadge=()=>{badge(mini?`📡${viewers?` 👀 ${viewers}`:''}`:`📡 EN VIVO · código <b>${code}</b>${viewers?` · 👀 ${viewers}`:''} <span class="x">✕</span>`);
+    const b=document.getElementById('live');b.classList.add('tap');b.classList.toggle('mini',mini)};
+  const setMini=v=>{mini=v;try{localStorage.setItem('marrano-live-mini',v?'1':'0')}catch(e){}showBadge()};
   showBadge();
+  const lb=document.getElementById('live');
+  ['pointerdown','mousedown','touchstart'].forEach(ev=>lb.addEventListener(ev,e=>e.stopPropagation()));
+  lb.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();setMini(!mini)});
+  if(!mini)setTimeout(()=>setMini(true),6000);
   /* globos, tele, muertes y final se mandan como eventos */
   const _say=say;say=function(t,ms){_say(t,ms);send('say',{t,ms})};
   const _tv=tvSay;tvSay=function(w,t,v){_tv(w,t,v);send('tv',{w,t})};
@@ -114,6 +122,9 @@ function viewer(){
 const css=document.createElement('style');
 css.textContent=`#live{position:absolute;top:8px;right:60px;z-index:6;display:none;background:rgba(193,18,31,.85);color:#fff;border:2px solid #000;border-radius:8px;padding:3px 9px;font-weight:700;font-size:clamp(10px,1.4vw,15px);pointer-events:none}
 #live b{letter-spacing:2px;color:#ffe25e}
+#live.tap{pointer-events:auto;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+#live.tap .x{margin-left:6px;opacity:.8}
+#live.mini{padding:2px 6px;opacity:.75}
 body.ver #scene,body.ver #panel,body.ver #end button,body.ver #wcard{pointer-events:none}
 body.ver #endB,body.ver #pclose{display:none}`;
 document.head.appendChild(css);
